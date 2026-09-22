@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+@font-face {
+  font-family: 'bootstrap-icons';
+  src: url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff') format('woff');
+  font-display: block;
+}
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#08090c">
+<title>ScriptForge</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Merriweather:wght@400;700;900&family=Playfair+Display:wght@500;700;900&family=Lora:wght@400;500;700&family=Crimson+Text:wght@400;600&family=EB+Garamond:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=Caveat:wght@400;600&family=Dancing+Script:wght@400;600&family=Source+Serif+4:wght@400;600&family=Courier+Prime:wght@400;700&family=IBM+Plex+Serif:wght@400;500;600&family=Libre+Baskerville:wght@400;700&family=Noto+Serif+Devanagari:wght@400;600&family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Bengali:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css?v=4">
+<link rel="stylesheet" href="layout.css?v=6">
+<link rel="stylesheet" href="pages.css?v=11">
+<link rel="stylesheet" href="overrides.css?v=65">
+<link rel="stylesheet" href="manager.css?v=1">
+<style>
+/* Video control bar — docked underneath the video area instead of floating over it */
+#vpFloatBar{
+  position: static;
+  flex: 0 0 auto;
+  margin-top: 10px;
+  background: #fff;
+  border: 1px solid #eaeaea;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* White bar, Geist/Vercel style: hairline gray borders, black primary play button */
+#vpFloatBar .mv-btn{
+  color: #000 !important;
+  border: 1px solid #e5e5e5 !important;
+}
+#vpFloatBar .mv-btn:hover{ background: #fafafa !important; }
+#vpFloatBar .mv-btn.active{ background: #f0f0f0 !important; }
+#vpFloatBar .mv-play{ background: #000 !important; color: #fff !important; border: 1px solid #000 !important; }
+#vpFloatBar .mv-play i{ color: #fff !important; }
+#vpFloatBar .mv-play:hover{ background: #333 !important; }
+#vpFloatBar .vp-divider{ background: #eaeaea !important; }
+#vpFloatBar .vp-time,
+#vpFloatBar .vp-vol-pct,
+#vpFloatBar .vp-aspect-pct{ color: #666 !important; }
+
+/* Playing bar — identical treatment to the music player's playing bar:
+   a white capsule holding time · slider · time, flat track, round black thumb. */
+/* Video seek — same capsule as the music player's seek bar */
+html body #vpFloatBar .vp-group-seek{
+  background: var(--surface-3) !important;
+  border: 1px solid var(--line-2) !important;
+  border-radius: var(--r-md,6px) !important;
+  padding: 6px 12px !important;
+  margin: 0 8px !important;
+  gap: 10px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+}
+order-box !important;
+#vpFloatBar .vp-group-seek input[type="range"]{
+  height: 4px !important;
+  background: #eaeaea !important;
+  border-radius: 2px !important;
+  overflow: visible !important;   /* let the round thumb show, like the music bar */
+}
+#vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-runnable-track{
+  height: 4px !important;
+  background: #eaeaea !important;
+  border-radius: 2px !important;
+}
+#vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: #000 !important;
+  border: none !important;
+  margin-top: -4px !important;
+}
+#vpFloatBar .vp-group-seek input[type="range"]::-moz-range-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: #000 !important;
+  border: none !important;
+}
+/* Video stage — Vercel-style rounded corners that hold while the video plays.
+   layout.css uses overflow:clip with a 260px clip-margin, which clips square
+   corners and lets the video bleed past the radius; hidden + radius fixes it. */
+#videoStage{
+  border-radius: var(--r-lg, 8px);
+  overflow: hidden;
+  overflow-clip-margin: 0;
+}
+
+/* ═══ Music player — Vercel style (Geist) ═══ */
+/* Play button: black pill, white glyph — the single primary control */
+#musicPanel .mv-play,
+.music-body .mv-play{
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid #000 !important;
+  border-radius: 6px !important;
+}
+#musicPanel .mv-play i,
+.music-body .mv-play i{ color: #fff !important; }
+#musicPanel .mv-play:hover,
+.music-body .mv-play:hover{ background: #333 !important; }
+/* Secondary transport buttons: hairline outlines */
+#musicPanel .mv-controls .mv-btn,
+.music-body .mv-controls .mv-btn{
+  color: #000 !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 6px !important;
+}
+#musicPanel .mv-controls .mv-btn:hover,
+.music-body .mv-controls .mv-btn:hover{ background: #fafafa !important; }
+/* Play stays the one solid black control, even inside the outlined row */
+#musicPanel .mv-controls .mv-play,
+.music-body .mv-controls .mv-play{
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid #000 !important;
+}
+#musicPanel .mv-controls .mv-play i,
+.music-body .mv-controls .mv-play i{ color: #fff !important; }
+#musicPanel .mv-controls .mv-play:hover,
+.music-body .mv-controls .mv-play:hover{ background: #333 !important; }
+/* Playlist area sized for a full 5-row page (5×52px rows + 4×2px gaps) and
+   free to grow when the panel has spare room — extra height goes to the
+   playlist body, never to the bottom pager bar */
+#musicPanel .mv-playlist-wrap{
+  flex: 1 1 auto !important;
+  min-height: 300px !important;   /* playlist head (32px) + full 5-row page (268px) */
+}
+#musicPanel .mv-playlist{
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 268px !important;
+  max-height: none !important;
+}
+/* Bottom pager bar — same shape as the video playlist panel's .vpl-pager */
+#musicPanel > .mv-pager{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 8px 14px !important;
+  border-top: 1px solid var(--line) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+}
+/* Video playlist row actions (play · rename · close) — ghost buttons, matching the music rows */
+#videoPlaylistPanel .vpl-play,
+#videoPlaylistPanel .vpl-rename,
+#videoPlaylistPanel .vpl-del{
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+#videoPlaylistPanel .vpl-play:hover,
+#videoPlaylistPanel .vpl-rename:hover,
+#videoPlaylistPanel .vpl-del:hover{
+  background: var(--overlay-strong) !important;
+  color: var(--ink) !important;
+}
+#videoPlaylistPanel .vpl-play i,
+#videoPlaylistPanel .vpl-rename i,
+#videoPlaylistPanel .vpl-del svg{
+  pointer-events: none !important;
+}
+/* Inline rename field */
+#videoPlaylistPanel .vpl-rename-edit{
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  font: inherit !important;
+  font-size: 12.5px !important;
+  line-height: 1.35 !important;
+  color: var(--ink) !important;
+  background: var(--surface-1) !important;
+  border: 1px solid var(--line-3) !important;
+  border-radius: 4px !important;
+  padding: 1px 5px !important;
+  margin: -2px 0 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Empty playlist — no icon, just the "+ to add" hint */
+#videoPlaylistPanel .vpl-empty{
+  padding: 46px 20px !important;
+}
+.vpl-empty-hint{
+  font-size: 12.5px !important;
+  color: var(--ink-3) !important;
+  line-height: 1.5 !important;
+}
+.vpl-empty-key{
+  color: var(--ink-2) !important;
+  font-family: var(--mono) !important;
+  font-weight: 600 !important;
+}
+
+/* Pager range label — same numbering system as the music player (page-last item) */
+.vpl-range{
+  flex: 1 1 auto !important;
+  text-align: center !important;
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--ink-3) !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: .02em !important;
+  user-select: none !important;
+}
+
+/* Pager chevrons — Vercel hairline outline, matching the video player buttons */
+#musicPanel .mv-pager-btn{
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 36px !important;
+  height: 36px !important;
+  color: #000 !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  font-size: 14px !important;
+}
+#musicPanel .mv-pager-btn:hover{ background: #fafafa !important; }
+#musicPanel .mv-pager-btn:disabled{ opacity: .3 !important; }
+/* Volume button + percentage, matching the video player bar */
+#musicPanel .mp-vol-btn,
+.music-body .mp-vol-btn{ color: #000 !important; border: 1px solid #e5e5e5 !important; border-radius: 6px !important; }
+#musicPanel .mp-vol-btn:hover,
+.music-body .mp-vol-btn:hover{ background: #fafafa !important; }
+#musicPanel .mp-vol-pct,
+.music-body .mp-vol-pct{
+  font-size: 11px;
+  font-family: var(--mono);
+  color: #666 !important;
+  font-variant-numeric: tabular-nums;
+  min-width: 32px;
+  pointer-events: none;
+}
+
+/* Music control row: shuffle far left · prev/play/next + volume centred ·
+   loop far right. The two outer zones are the same width, so the middle
+   group always lands dead centre and nothing can overlap. */
+#musicPanel .mv-controls{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+#musicPanel .mv-controls-left,
+#musicPanel .mv-controls-center,
+#musicPanel .mv-controls-right{
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+#musicPanel .mv-controls-left,
+#musicPanel .mv-controls-right{
+  flex: 0 0 36px !important;    /* equal sides keep the centre group centred */
+  justify-content: center !important;
+}
+/* Volume button + percentage ride along with the transport in the centre */
+#musicPanel .mv-volume{
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin-left: 2px !important;
+}
+#musicPanel .mv-controls .mv-btn.active{
+  background: #f0f0f0 !important;
+  color: #000 !important;
+  border-color: #e5e5e5 !important;
+}
+/* Playing bar — the same white docked bar as the video player's control bar */
+#musicPanel .mv-seek{
+  gap: 10px !important;
+  background: #fff !important;
+  border: 1px solid #eaeaea !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+}
+#musicPanel .mv-seek span{ color: #666 !important; }
+/* Body takes the extra height; the chevron bar keeps its natural size.
+   If the window is too short for the whole panel, the BODY scrolls —
+   a row can never be clipped, and the pager bar never stretches. */
+#musicPanel.panel-shell{
+  height: 700px !important;
+  max-height: calc(100vh - 40px) !important;
+}
+#musicPanel .music-body{
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  justify-content: flex-start !important;
+  scrollbar-width: none !important;
+}
+#musicPanel .music-body::-webkit-scrollbar{ display: none !important; width: 0 !important; }
+#musicPanel > .mv-pager{ flex: 0 0 auto !important; }
+#musicPanel .mv-seek input[type="range"],
+#musicPanel .mv-seek input[type="range"]::-webkit-slider-runnable-track{
+  height: 4px !important;
+  background: #eaeaea !important;
+  border-radius: 2px !important;
+}
+#musicPanel .mv-seek input[type="range"]::-webkit-slider-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: #000 !important;
+  border: none !important;
+  margin-top: -4px !important;
+}
+#musicPanel .mv-seek input[type="range"]::-moz-range-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: #000 !important;
+  border: none !important;
+}
+
+/* CSS fallback fullscreen when the browser rejects requestFullscreen
+   (e.g. right-click without enough user activation) */
+.vp-fs-fallback{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  transform: none !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  padding: 0 !important;
+}
+.vp-fs-fallback .video-stage{ border-radius: 0 !important; }
+.vp-fs-fallback .vp-float-bar{ margin: 0 !important; border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+/* Pager chevrons — identical treatment to the shuffle / repeat buttons */
+html body #musicPanel > .mv-pager .mv-pager-btn{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:36px !important;
+  height:36px !important;
+  padding:0 !important;
+  background:var(--surface-3) !important;   /* same fill as shuffle / repeat */
+  border:0 !important;                      /* kills the old white hairline */
+  border-radius:var(--r-md,6px) !important;
+  color:var(--ink-2) !important;
+  font-size:14px !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+html body #musicPanel > .mv-pager .mv-pager-btn:hover{
+  background:var(--surface-4) !important;
+  color:var(--ink) !important;
+}
+html body #musicPanel > .mv-pager .mv-pager-btn:disabled{ opacity:.45 !important; }
+
+/* Music play button — the video player's colour (no white), nothing else touched */
+html body #musicPanel .mv-play,
+html body #musicPanel .mv-controls .mv-play,
+html body .music-body .mv-controls .mv-play{
+  background:var(--accent) !important;
+  border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+}
+html body #musicPanel .mv-play i,
+html body #musicPanel .mv-controls .mv-play i{ color:var(--accent-ink) !important; }
+html body #musicPanel .mv-play:hover,
+html body #musicPanel .mv-controls .mv-play:hover{ background:var(--accent-2) !important; }
+/* ═══════════════════════════════════════════════════════════
+   MUSIC PLAYER — video player's frame · black stage · one bar
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1 · same frame and size as the video player */
+html body #musicPanel.panel-shell{
+  width:min(880px, calc(100vw - 80px)) !important;
+  height:min(560px, calc(100vh - 140px)) !important;
+  min-height:0 !important;
+  max-height:calc(100vh - 140px) !important;
+}
+
+/* 2 · two rows: the stage (fills) + one bar (hugs) */
+html body #musicPanel .music-body{
+  display:grid !important;
+  grid-template-rows:1fr auto !important;
+  grid-template-columns:auto auto auto auto minmax(0,1fr) auto auto !important;
+  gap:0 8px !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+
+/* ── row 1 · the black stage — full width, no outline ── */
+html body #musicPanel .mv-now-row{
+  grid-row:1 !important; grid-column:1 !important;
+  display:flex !important; align-items:stretch !important;
+  min-height:0 !important; background:transparent !important;
+  border:0 !important; box-shadow:none !important;
+}
+html body #musicPanel .mv-now{
+  height:100% !important; width:100% !important;
+  flex:1 1 auto !important; flex-basis:auto !important;
+  min-height:0 !important; background:#000 !important;
+  border:0 !important; box-shadow:none !important;
+  border-radius:var(--r-lg,8px) !important; overflow:hidden !important;
+}
+html body #musicPanel .mv-visualizer{ height:100% !important; background:transparent !important; }
+html body #musicPanel .mv-visualizer span{ max-width:9px !important; background:var(--ink) !important; }
+
+@keyframes mvVisScreen{ from{ height:3%; } to{ height:88%; } }
+html body #musicPanel .mv-visualizer.playing span{ animation:mvVisScreen 800ms ease-in-out infinite alternate !important; }
+html body #musicPanel .mv-visualizer.playing span:nth-child(4n+1){ animation-duration:700ms !important; }
+html body #musicPanel .mv-visualizer.playing span:nth-child(4n+2){ animation-duration:850ms !important; }
+html body #musicPanel .mv-visualizer.playing span:nth-child(4n+3){ animation-duration:620ms !important; }
+html body #musicPanel .mv-visualizer.playing span:nth-child(4n+4){ animation-duration:780ms !important; }
+
+/* ── row 2 · ONE bar — a copy of #vpFloatBar ── */
+html body #musicPanel .music-body{
+  display:grid !important;
+  grid-template-rows:1fr auto !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  gap:10px !important; padding:10px !important;
+  min-height:0 !important; overflow:hidden !important;
+}
+html body #musicPanel .mv-controls{
+  grid-row:2 !important; grid-column:1 !important;
+  display:flex !important; align-items:center !important;
+  gap:0 !important; padding:4px 8px !important;
+  background:var(--surface-2) !important;   /* same as #vpFloatBar */
+  border:0 !important; border-radius:var(--r-md,6px) !important;
+  min-width:0 !important;
+}
+html body #musicPanel .mv-controls-center{
+  display:flex !important; align-items:center !important;
+  gap:2px !important; padding:0 6px !important; flex:0 0 auto !important;
+}
+html body #musicPanel .mv-controls-left,
+html body #musicPanel .mv-controls-right{
+  display:flex !important; align-items:center !important;
+  gap:2px !important; padding:0 6px !important;
+  flex:0 0 auto !important;                  /* kills the 78px box */
+  justify-content:flex-start !important;
+}
+html body #musicPanel .mv-volume{
+  display:flex !important; align-items:center !important;
+  gap:8px !important; padding:0 6px !important; flex:0 0 auto !important;
+}
+html body #musicPanel .mv-seek{
+  flex:1 1 auto !important; min-width:0 !important;
+  gap:10px !important; padding:4px 12px !important; margin:0 2px !important;
+  background:var(--surface-3) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+}
+
+/* the four hairlines, in the video bar's positions */
+html body #musicPanel .mv-controls-center::before,
+html body #musicPanel .mv-controls-center::after,
+html body #musicPanel .mv-volume::before,
+html body #musicPanel .mv-controls-right::before{
+  content:'' !important; flex:0 0 1px !important;
+  width:1px !important; height:20px !important;
+  margin:0 6px !important; background:var(--line) !important;
+}
+
+/* ── the two align dots — in the bar, after Loop, stacked vertically ── */
+html body #musicPanel .mv-controls-right .mv-align-dots{
+  display:flex !important; flex-direction:column !important;
+  gap:4px !important; width:auto !important;
+  align-items:center !important; margin-left:6px !important;
+}
+html body #musicPanel .mv-align-dot{ width:8px !important; height:8px !important; }
+html body #musicPanel .mv-align-dot:hover{ border-color:rgba(255,255,255,.7) !important; }
+html body #musicPanel .mv-align-dot.active{ background:var(--ink) !important; border-color:var(--ink) !important; }
+
+/* 4 · one bar, the video order:
+      playlist · prev · play · next · seek · volume · shuffle + loop */
+html body #musicPanel .mv-controls,
+html body #musicPanel .mv-controls-center{ display:contents !important; }
+
+html body #musicPanel .mv-controls-left      { grid-row:2 !important; grid-column:1 !important; align-self:center !important; }
+html body #musicPanel [data-act="mp-prev"]   { grid-row:2 !important; grid-column:2 !important; align-self:center !important; }
+html body #musicPanel [data-act="mp-toggle"] { grid-row:2 !important; grid-column:3 !important; align-self:center !important; }
+html body #musicPanel [data-act="mp-next"]   { grid-row:2 !important; grid-column:4 !important; align-self:center !important; }
+html body #musicPanel .mv-seek               { grid-row:2 !important; grid-column:5 !important; align-self:center !important; }
+html body #musicPanel .mv-volume             { grid-row:2 !important; grid-column:6 !important; align-self:center !important; }
+html body #musicPanel .mv-controls-right     { grid-row:2 !important; grid-column:7 !important; align-self:center !important; }
+
+/* 5 · chevrons — one style for both playlist panels */
+html body .mv-pager-btn{
+  width:36px !important; height:36px !important; padding:0 !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  background:var(--surface-3) !important; color:var(--ink-2) !important;
+  border:0 !important; border-radius:var(--r-md,6px) !important;
+  font-size:14px !important; opacity:1 !important; visibility:visible !important;
+}
+html body .mv-pager-btn:hover{ background:var(--surface-4) !important; color:var(--ink) !important; }
+html body .mv-pager-btn:disabled{ opacity:.45 !important; }
+}
+
+/* ═══════ FINAL — music player: full-width stage + video-style bar ═══════ */
+html body #musicPanel .music-body{
+  display:flex !important; flex-direction:column !important;
+  gap:10px !important; padding:10px !important;
+  min-height:0 !important; overflow:hidden !important;
+}
+html body #musicPanel .mv-now-row{
+  display:flex !important; flex:1 1 auto !important;
+  align-items:stretch !important; width:100% !important;
+  min-height:0 !important; background:transparent !important;
+  border:0 !important; box-shadow:none !important;
+}
+html body #musicPanel .mv-now{
+  flex:1 1 auto !important; flex-basis:auto !important;
+  width:100% !important; height:100% !important; min-height:0 !important;
+  background:#000 !important; border:0 !important; box-shadow:none !important;
+  border-radius:var(--r-lg,8px) !important; overflow:hidden !important;
+}
+html body #musicPanel .mv-visualizer{ height:100% !important; background:transparent !important; }
+html body #musicPanel .mv-visualizer span{ max-width:9px !important; background:var(--ink) !important; }
+html body #musicPanel .mv-now-row .mv-align-dots{ display:none !important; }
+
+html body #musicPanel .mv-controls{
+  display:flex !important; flex:0 0 auto !important;
+  align-items:center !important; gap:0 !important; width:100% !important;
+  padding:4px 8px !important;
+  background:var(--surface-2) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important; min-width:0 !important;
+}
+html body #musicPanel .mv-controls-center{
+  display:flex !important; align-items:center !important;
+  gap:2px !important; padding:0 6px !important; flex:0 0 auto !important;
+}
+html body #musicPanel .mv-controls-left,
+html body #musicPanel .mv-controls-right{
+  display:flex !important; align-items:center !important;
+  gap:2px !important; padding:0 6px !important;
+  flex:0 0 auto !important; justify-content:flex-start !important;
+}
+html body #musicPanel .mv-volume{
+  display:flex !important; align-items:center !important;
+  gap:8px !important; padding:0 6px !important; flex:0 0 auto !important;
+}
+html body #musicPanel .mv-seek{
+  flex:1 1 auto !important; min-width:0 !important;
+  gap:10px !important; padding:4px 12px !important; margin:0 2px !important;
+  background:var(--surface-3) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+}
+html body #musicPanel .mv-controls-center::before,
+html body #musicPanel .mv-controls-center::after,
+html body #musicPanel .mv-volume::before,
+html body #musicPanel .mv-controls-right::before{
+  content:'' !important; flex:0 0 1px !important;
+  width:1px !important; height:20px !important;
+  margin:0 6px !important; background:var(--line) !important;
+}
+html body #musicPanel .mv-controls-right .mv-align-dots{
+  display:flex !important; flex-direction:column !important;
+  gap:4px !important; width:auto !important;
+  align-items:center !important; margin-left:6px !important;
+}
+html body #musicPanel .mv-align-dot{ width:8px !important; height:8px !important; }
+
+/* ═══════ LAST WORD — music bar matches the video bar ═══════ */
+html body #musicPanel.panel-shell .music-body{
+  display:flex !important; flex-direction:column !important;
+  gap:10px !important; padding:10px !important;
+  min-height:0 !important; overflow:hidden !important;
+}
+html body #musicPanel.panel-shell .mv-now-row{
+  display:flex !important; flex:1 1 auto !important;
+  align-items:stretch !important; width:100% !important; min-height:0 !important;
+  border:0 !important; box-shadow:none !important; background:transparent !important;
+}
+html body #musicPanel.panel-shell .mv-now{
+  flex:1 1 auto !important; flex-basis:auto !important;
+  width:100% !important; height:100% !important; min-height:0 !important;
+  background:#000 !important; border:0 !important; box-shadow:none !important;
+  border-radius:var(--r-lg,8px) !important; overflow:hidden !important;
+}
+html body #musicPanel.panel-shell .mv-now-row .mv-align-dots{ display:none !important; }
+
+html body #musicPanel.panel-shell .mv-controls{
+  display:flex !important; flex:0 0 auto !important;
+  align-items:center !important; gap:0 !important;
+  width:100% !important; padding:4px 8px !important;
+  background:var(--surface-2) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important; min-width:0 !important;
+}
+html body #musicPanel.panel-shell .mv-controls-left,
+html body #musicPanel.panel-shell .mv-controls-right{
+  display:flex !important; align-items:center !important;
+  gap:2px !important; padding:0 6px !important;
+  flex:0 0 auto !important; width:auto !important; min-width:0 !important;
+  justify-content:flex-start !important;
+}
+html body #musicPanel.panel-shell .mv-controls-center{
+  display:flex !important; align-items:center !important;
+  gap:2px !important; padding:0 6px !important; flex:0 0 auto !important;
+}
+html body #musicPanel.panel-shell .mv-volume{
+  display:flex !important; align-items:center !important;
+  gap:8px !important; padding:0 6px !important; flex:0 0 auto !important;
+}
+html body #musicPanel.panel-shell .mv-seek{
+  flex:1 1 auto !important; min-width:0 !important; gap:10px !important;
+  padding:4px 12px !important; margin:0 2px !important;
+  background:var(--surface-3) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+}
+html body #musicPanel.panel-shell .mv-controls-center::before,
+html body #musicPanel.panel-shell .mv-controls-center::after,
+html body #musicPanel.panel-shell .mv-volume::before,
+html body #musicPanel.panel-shell .mv-controls-right::before{
+  content:'' !important; flex:0 0 1px !important;
+  width:1px !important; height:20px !important;
+  margin:0 6px !important; background:var(--line) !important;
+}
+
+/* buttons: the video bar's own size and rounding, no exceptions */
+html body #musicPanel.panel-shell .mv-controls .mv-btn{
+  width:36px !important; height:36px !important;
+  border-radius:var(--r-sm) !important; flex-shrink:0 !important;
+}
+html body #musicPanel.panel-shell .mv-controls .mv-play{
+  width:42px !important; height:36px !important;
+}
+
+/* the dots: perfect vertical stack, with real space after Repeat */
+html body #musicPanel.panel-shell .mv-controls-right .mv-align-dots{
+  display:flex !important; flex-direction:column !important;
+  align-self:center !important; align-items:center !important;
+  justify-content:center !important; gap:5px !important;
+  width:auto !important; height:auto !important; margin:0 0 0 12px !important;
+}
+html body #musicPanel.panel-shell .mv-align-dot{
+  width:8px !important; height:8px !important; min-width:8px !important;
+  flex:0 0 8px !important; padding:0 !important; box-sizing:border-box !important;
+}
+/* ═══ MUSIC BAR = VIDEO BAR (v2) ═══ */
+html body #musicPanel{ --mp-bar:1; }
+
+html body #musicPanel.panel-shell .music-body{
+  display:flex !important; flex-direction:column !important;
+  gap:10px !important; padding:10px !important;
+  min-height:0 !important; overflow:hidden !important;
+}
+html body #musicPanel.panel-shell .mv-now-row{
+  display:flex !important; flex:1 1 auto !important;
+  align-items:stretch !important; width:100% !important; min-height:0 !important;
+  border:0 !important; box-shadow:none !important; background:transparent !important;
+}
+html body #musicPanel.panel-shell .mv-now{
+  flex:1 1 auto !important; flex-basis:auto !important;
+  width:100% !important; height:100% !important; min-height:0 !important;
+  background:#000 !important; border:0 !important; box-shadow:none !important;
+  border-radius:var(--r-lg,8px) !important; overflow:hidden !important;
+}
+html body #musicPanel.panel-shell .mv-now-row .mv-align-dots{ display:none !important; }
+
+html body #musicPanel.panel-shell .mv-controls{
+  display:flex !important; flex:0 0 auto !important;
+  align-items:center !important; gap:0 !important;
+  width:100% !important; padding:4px 8px !important;
+  background:var(--surface-2) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important; min-width:0 !important;
+}
+html body #musicPanel.panel-shell .mv-controls-left,
+html body #musicPanel.panel-shell .mv-controls-center,
+html body #musicPanel.panel-shell .mv-controls-right,
+html body #musicPanel.panel-shell .mv-volume{
+  display:flex !important; align-items:center !important;
+  gap:2px !important; padding:0 6px !important;
+  flex:0 0 auto !important; width:auto !important; min-width:0 !important;
+  justify-content:flex-start !important;
+}
+html body #musicPanel.panel-shell .mv-seek{
+  flex:1 1 auto !important; min-width:0 !important;
+  gap:10px !important; padding:6px 12px !important; margin:0 8px !important;
+  background:var(--surface-3) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+}
+html body #musicPanel.panel-shell .mv-controls-center::before,
+html body #musicPanel.panel-shell .mv-controls-center::after,
+html body #musicPanel.panel-shell .mv-volume::before,
+html body #musicPanel.panel-shell .mv-controls-right::before{
+  content:'' !important; flex:0 0 1px !important;
+  width:1px !important; height:20px !important;
+  margin:0 !important; background:var(--line) !important;
+}
+html body #musicPanel.panel-shell .mv-controls .mv-btn{
+  width:36px !important; height:36px !important; border-radius:var(--r-sm) !important;
+}
+html body #musicPanel.panel-shell .mv-controls .mv-play{ width:42px !important; height:36px !important; }
+
+html body #musicPanel.panel-shell .mv-controls-right .mv-align-dots{
+  display:flex !important; flex-direction:column !important;
+  align-self:center !important; align-items:center !important; justify-content:center !important;
+  gap:5px !important; width:auto !important; height:auto !important;
+  margin:0 0 0 10px !important;
+}
+html body #musicPanel.panel-shell .mv-align-dot{
+  width:8px !important; height:8px !important; min-width:8px !important;
+  flex:0 0 8px !important; padding:0 !important; box-sizing:border-box !important;
+}
+/* gaps: the video's exact 13px (cancels the group's own 2px gap) */
+html body #musicPanel.panel-shell .mv-controls-center::before,
+html body #musicPanel.panel-shell .mv-volume::before,
+html body #musicPanel.panel-shell .mv-controls-right::before{
+  margin:0 -2px 0 0 !important;
+}
+html body #musicPanel.panel-shell .mv-controls-center::after{
+  margin:0 0 0 -2px !important;
+}
+
+/* dots: smaller and tighter so the seek keeps the video's width */
+html body #musicPanel.panel-shell .mv-controls-right .mv-align-dots{
+  gap:4px !important;
+  margin:0 0 0 6px !important;
+}
+html body #musicPanel.panel-shell .mv-align-dot{
+  width:6px !important; height:6px !important;
+  min-width:6px !important; flex:0 0 6px !important;
+}
+/* turn off the drawn (invisible) fake dividers */
+html body #musicPanel.panel-shell .mv-controls-center::before,
+html body #musicPanel.panel-shell .mv-controls-center::after,
+html body #musicPanel.panel-shell .mv-volume::before,
+html body #musicPanel.panel-shell .mv-controls-right::before{
+  content:none !important;
+}
+
+/* ONE divider style for both bars — same width, height and colour */
+html body #vpFloatBar .vp-divider,
+html body #musicPanel.panel-shell .mv-controls > .vp-divider{
+  width:1px !important;
+  height:20px !important;
+  background:var(--line-2) !important;
+  flex:0 0 1px !important;
+  margin:0 !important;
+}
+
+/* with real dividers the 13px rhythm happens by itself */
+html body #musicPanel.panel-shell .mv-controls-center,
+html body #musicPanel.panel-shell .mv-controls-right,
+html body #musicPanel.panel-shell .mv-volume{
+  padding:0 6px !important;
+}
+/* 1 · buttons: one radius for BOTH bars, a little rounder than before */
+html body #vpFloatBar .mv-btn,
+html body #musicPanel.panel-shell .mv-controls .mv-btn,
+html body #musicPanel.panel-shell .mp-vol-btn{
+  border-radius:6px !important;
+}
+html body #vpFloatBar .mv-play,
+html body #musicPanel.panel-shell .mv-controls .mv-play{
+  border-radius:6px !important;
+}
+
+/* 2 · the empty 10px box after "80%" */
+html body #musicPanel.panel-shell .mp-vol-pct{
+  min-width:0 !important;
+  width:auto !important;
+  text-align:left !important;
+  margin:0 !important;
+}
+
+/* 3 · volume group: the video's own internal spacing (icon ↔ number) */
+html body #musicPanel.panel-shell .mv-volume{
+  gap:8px !important;
+  padding:0 6px !important;
+}
+/* a little breathing room between Shuffle and Loop */
+html body #musicPanel.panel-shell .mv-controls-right [data-act="mp-shuffle"]{
+  margin-right:6px !important;
+}
+/* a little breathing room between Aspect and Fullscreen */
+html body #vpFloatBar .vp-group #vpAspectBtn{
+  margin-right:6px !important;
+}
+/* ══════════ ONE DOT · CANVAS MOTION VISUALIZER ══════════ */
+
+/* old dot pairs stay gone */
+html body #musicPanel .mv-align-dots{ display:none !important; }
+
+/* the stage is now the coordinate box for the canvas */
+html body #musicPanel .mv-visualizer{ position:relative !important; }
+html body #musicPanel .mv-visualizer > canvas.mp-motion{
+  position:absolute !important; inset:0 !important;
+  width:100% !important; height:100% !important;
+  display:block !important; pointer-events:none !important; z-index:2;
+}
+/* motion on → the equalizer bars step aside */
+html body #musicPanel .mv-visualizer.motion-on > span{ display:none !important; }
+
+/* the dot + its settings button — bottom-right corner of the stage */
+html body #musicPanel .mv-visualizer > .motion-corner{
+  position:absolute !important;
+  right:10px !important; bottom:10px !important;
+  z-index:3;
+  display:flex !important; align-items:center !important; gap:6px !important;
+}
+html body #musicPanel .motion-corner .viz-dot{
+  width:11px !important; height:11px !important; flex:0 0 11px !important;
+  min-width:11px !important; padding:0 !important; margin:0 !important;
+  border:1px solid var(--ink-4) !important; border-radius:50% !important;
+  background:transparent !important;
+  transition:background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+html body #musicPanel .motion-corner .viz-dot:hover{ border-color:var(--ink-2) !important; transform:scale(1.15); }
+html body #musicPanel .motion-corner .viz-dot.active{
+  background:#fab387 !important; border-color:#fab387 !important;
+  box-shadow:0 0 0 3px rgba(250,179,135,.16) !important;
+}
+html body #musicPanel .motion-corner .viz-picker-btn{
+  width:22px !important; height:22px !important; flex:0 0 22px !important;
+  padding:0 !important; margin:0 !important; border:0 !important;
+  background:transparent !important; color:var(--ink-4) !important;
+  border-radius:var(--r-sm,4px) !important; font-size:13px !important;
+}
+html body #musicPanel .motion-corner .viz-picker-btn:hover{
+  background:rgba(255,255,255,.08) !important; color:var(--ink) !important;
+}
+
+
+/* the picker */
+html body #motionPicker{
+  position:fixed; z-index:400; width:256px;
+  background:var(--surface-2); border:1px solid var(--line-2);
+  border-radius:var(--r-lg,8px); box-shadow:var(--e-3);
+  padding:10px; font:inherit; font-size:12px; color:var(--ink);
+}
+html body #motionPicker[hidden]{ display:none !important; }
+html body #motionPicker .motion-picker-head{
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:12.5px; font-weight:600; margin-bottom:6px;
+}
+html body #motionPicker .motion-picker-head button{
+  color:var(--ink-3); font-size:12px; padding:2px 4px; border-radius:4px;
+}
+html body #motionPicker .motion-picker-head button:hover{ background:var(--overlay); color:var(--ink); }
+html body #motionPicker .motion-row{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; padding:5px 0;
+}
+html body #motionPicker .motion-row > span{ color:var(--ink-3); }
+html body #motionPicker select{
+  width:132px; padding:4px 6px; font-size:12px;
+  background:var(--surface-3); border:1px solid var(--line-2);
+  border-radius:var(--r-sm,4px); color:var(--ink);
+}
+html body #motionPicker input[type="range"]{ width:132px; }
+html body #motionPicker input[type="color"]{
+  width:36px; height:24px; padding:0; background:none;
+  border:1px solid var(--line-2); border-radius:4px;
+}
+
+html body #floatingImport{
+  position:fixed !important;
+  top:auto !important;
+  left:auto !important;
+  bottom:16px !important;
+  right:16px !important;
+  z-index:115 !important;
+  transform:none !important;
+}
+
+
+</style>
+</head>
+<body>
+<script>
+/* Apply the saved theme before the app renders */
+try{
+  /* Overlay panes render the app read-only — no writes, no chrome */
+  var _p = new URLSearchParams(location.search);
+  if(_p.get('sfView') === '1' && window.parent !== window){
+    window.SF_VIEW = true;
+    document.documentElement.classList.add('sf-view');
+    document.body.classList.add('sf-view');
+  }
+  /* Paint the last used color theme from cache — no flash of the default */
+  var _cfg = JSON.parse(localStorage.getItem('sf7_config') || '{}');
+  var _th  = JSON.parse(localStorage.getItem('sf6_theme') || 'null');
+  if(_th && _th.tokens){
+    var _tokens = _th.tokens;
+    Object.keys(_tokens).forEach(function(k){
+      document.documentElement.style.setProperty(k, _tokens[k]);
+      document.body.style.setProperty(k, _tokens[k]);
+    });
+    document.documentElement.style.colorScheme = _th.scheme || 'dark';
+    document.body.style.colorScheme = _th.scheme || 'dark';
+  }
+  var _id = (_th && _th.id) || _cfg.theme || 'night';
+  document.body.setAttribute('data-theme', _id);
+  document.body.setAttribute('data-theme-resolved', (_th && _th.resolved) || _id);
+}catch(e){}
+</script>
+
+<!-- ═══════════ BOOT ANIMATION ═══════════ -->
+<div class="boot-overlay" id="bootOverlay">
+  <div class="boot-inner">
+    <div class="boot-logo">
+      <span class="boot-mark"><i class="bi bi-collection-play"></i></span>
+    </div>
+    <div class="boot-bar">
+      <div class="boot-fill" id="bootFill"></div>
+    </div>
+    <div class="boot-status" id="bootStatus">Starting up…</div>
+  </div>
+</div>
+
+<!-- eye comfort — a warm light filter that sits over whichever theme is on -->
+<div id="sfEyeOverlay" aria-hidden="true"></div>
+
+<!-- ═══════════ TOP BAR ═══════════ -->
+<header class="topbar">
+  <button class="logo-btn" title="Home">
+     <span class="logo-mark"><i class="bi bi-collection-play"></i></span>
+  </button>
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-actions" id="topbarActions" hidden>
+  <button class="topbar-btn" data-act="open-music" title="Player">
+    <i class="bi bi-play-circle"></i>
+    <span>Player</span>
+  </button>
+  <button class="topbar-btn" data-act="open-settings" title="Settings">
+    <i class="bi bi-gear"></i>
+    <span>Settings</span>
+  </button>
+</div>
+</header>
+
+<!-- ═══════════ MAIN STAGE ═══════════ -->
+<main class="stage" id="stage"></main>
+
+<!-- ═══════════ STATUS BAR (only on content pages) ═══════════ -->
+<footer class="statusbar" id="statusbar" hidden>
+  <div class="sb-left" id="sbLeft"></div>
+  <div class="sb-right" id="sbRight"></div>
+</footer>
+
+<!-- ═══════════ OVERLAY SCREEN (draggable · resizable) ═══════════ -->
+<div class="ovl-wrap" id="ovlWrap" hidden>
+  <div class="ovl" id="ovlPanel">
+            <div class="ovl-head" id="ovlHead">
+      <span class="ovl-grab"></span>
+      <span class="ovl-acts">
+        <button class="icon-btn-sm" data-ovl="swap" title="Swap with the app screen"><i class="bi bi-arrow-left-right"></i></button>
+        <button class="v-close" data-ovl="close" title="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </span>
+    </div>
+
+
+
+    <div class="ovl-body">
+      <iframe class="ovl-frame" id="ovlFrame" title="Overlay view" allow="autoplay; clipboard-write"></iframe>
+    </div>
+    <span class="ovl-edge" id="ovlEdge" title="Drag to resize the width"></span>
+    <span class="ovl-grip" id="ovlGrip" title="Drag to resize"></span>
+  </div>
+</div>
+
+
+<!-- ═══════════ AI PANEL (draggable) ═══════════ -->
+<div class="ai-panel" id="aiPanel" hidden>
+  <div class="ai-head" id="aiHead">
+    <span class="ai-title"><i class="bi bi-sparkles"></i> AI</span>
+    <div class="ai-head-actions">
+      <button class="icon-btn-sm" data-act="ai-min"><i class="bi bi-dash-lg"></i></button>
+      <button class="icon-btn-sm" data-act="ai-close"><i class="bi bi-x-lg"></i></button>
+    </div>
+  </div>
+  <div class="ai-body" id="aiBody"></div>
+</div>
+
+<!-- ═══════════ MODAL ROOT ═══════════ -->
+<div class="modal-root" id="modalRoot"></div>
+
+<!-- ═══════════ TOAST ═══════════ -->
+<div class="toast" id="toast"><i class="bi bi-check-circle-fill"></i><span id="toastMsg"></span></div>
+<div class="toast-left" id="toastLeft"><i class="bi bi-info-circle-fill"></i><span id="toastLeftMsg"></span></div>
+
+<!-- ═══════════ COMMAND BOX (opens via Super / Shift+`) ═══════════ -->
+<div class="cmd-box" id="cmdBox" hidden>
+  <div class="cmd-head">
+    <i class="bi bi-command"></i>
+    <input class="cmd-input" id="cmdInput" placeholder="Type shortcut or command…" autocomplete="off" spellcheck="false">
+    <kbd>Esc</kbd>
+  </div>
+  <div class="cmd-list" id="cmdList"></div>
+  <div class="cmd-foot">
+    <span class="cmd-hint"><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+    <span class="cmd-hint"><kbd>↵</kbd> run</span>
+  </div>
+</div>
+
+<!-- ═══════════ MUSIC MINI (all other pages) ═══════════ -->
+<div class="music-mini" id="musicMini" hidden>
+  <i class="bi bi-music-note-beamed mini-icon"></i>
+  <span class="mini-song" id="miniSong">No track</span>
+  <button class="mini-btn" data-act="mp-toggle"><i class="bi bi-play-fill" id="miniPlayIcon"></i></button>
+  <button class="mini-btn" data-act="mp-next"><i class="bi bi-skip-forward-fill"></i></button>
+  <span class="mini-dot" id="miniDot" hidden></span>
+</div>
+
+<!-- ═══════════ SCRIPTS — order matters ═══════════ -->
+<script src="state.js?v=14"></script>
+<script src="fs.js"></script>
+<script src="io.js"></script>
+<script src="pages.js?v=95"></script>
+<script src="manager.js?v=4"></script>
+<script src="ai.js?v=8"></script>
+<script src="plugins.js?v=9"></script>
+<script src="tools.js?v=2"></script>
+<script src="settings.js?v=16"></script>
+<script src="panels.js?v=9"></script>
+<script src="motion.js?v=4"></script>
+<script src="app.js?v=38"></script>
+<script src="chapter-buttons.js?v=18"></script>
+<script src="overlay.js?v=13"></script>
+<script src="utils.js?v=3"></script>
+<script src="sounds.js?v=2"></script>
+
+
+
+<!-- ═══════════ INFO PANEL (slides in from right) ═══════════ -->
+<aside class="info-panel" id="infoPanel">
+  <div class="info-head">
+    <span class="info-title" id="infoTitle">Info</span>
+  </div>
+  <div class="info-body" id="infoBody"></div>
+</aside>
+
+<!-- ═══════════ IMPORT BUTTON (bottom-right floating) ═══════════ -->
+<button class="floating-import" id="floatingImport" title="Left-click: add audio · Right-click: add video">
+
+  <i class="bi bi-box-arrow-in-down"></i>
+  <span>Import</span>
+</button>
+
+<!-- ═══════════ FAB ═══════════ -->
+<div class="fab-wrap" id="fabWrap">
+  <div class="fab-menu" id="fabMenu" hidden>
+    <div class="fab-menu-head">Views</div>
+    <div class="fab-menu-body" id="fabMenuViews"></div>
+  </div>
+  <div class="fab-ai" id="fabAI" hidden>
+    <div class="fab-ai-head">
+      <i class="bi bi-stars"></i>
+      <span>AI Assistant</span>
+    </div>
+    <div class="fab-ai-body" id="fabAIBody"></div>
+  </div>
+       <button class="fab-btn" id="fabBtn" title="Menu · right-click for AI">
+    <span class="fab-mark"><i class="bi bi-pen-fill"></i></span>
+  </button>
+</div>
+
+<!-- ═══════════ VIDEO PANEL ═══════════ -->
+<div class="panel-shell video-panel" id="videoPanel" hidden>
+
+  <div class="panel-head" id="videoPanelHead">
+    <div class="panel-search" id="videoSearchWrap" hidden>
+      <input class="panel-search-input" id="videoSearchInput" placeholder="Paste URL…">
+    </div>
+    <div class="panel-head-actions">
+      <button class="panel-icon-btn" data-act="video-plus" title="Add URL (left-click) or pick file (right-click)">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+      <button class="v-close" data-act="video-close" title="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-body" id="videoBody">
+
+    <div class="video-stage" id="videoStage"></div>
+
+    <!-- Control bar (docked under the video) -->
+<div class="vp-float-bar" id="vpFloatBar">
+
+  <!-- Group 1: Playlist -->
+  <div class="vp-group">
+    <button class="mv-btn" data-act="video-playlist" title="Playlist">
+  <i class="bi bi-collection-play"></i>
+</button>
+  </div>
+
+  <div class="vp-divider"></div>
+
+  <!-- Group 2: Transport -->
+  <div class="vp-group">
+    <button class="mv-btn" data-act="video-prev" title="Previous">
+      <i class="bi bi-skip-start-fill"></i>
+    </button>
+    <button class="mv-btn mv-play" data-act="video-toggle" title="Play/Pause">
+      <i class="bi bi-play-fill" id="vpPlayIcon"></i>
+    </button>
+    <button class="mv-btn" data-act="video-next" title="Next">
+      <i class="bi bi-skip-end-fill"></i>
+    </button>
+  </div>
+
+  <div class="vp-divider"></div>
+
+  <!-- Group 3: Seek bar -->
+  <div class="vp-group vp-group-seek">
+    <span class="vp-time" id="vpCur">0:00</span>
+    <input type="range" id="vpSeek" min="0" max="100" value="0">
+    <span class="vp-time" id="vpDur">0:00</span>
+  </div>
+
+  <div class="vp-divider"></div>
+
+  <!-- Group 4: Volume + always-visible percentage -->
+  <div class="vp-group">
+    <button class="mv-btn" id="vpVolBtn" title="Left-click: down · Right-click: up">
+      <i class="bi bi-volume-up" id="vpVolIcon"></i>
+    </button>
+    <span class="vp-vol-pct" id="vpVolPct">80%</span>
+  </div>
+
+  <div class="vp-divider"></div>
+
+  <!-- Group 5: Aspect + Fullscreen -->
+<div class="vp-group">
+  <button class="mv-btn vp-aspect-btn" id="vpAspectBtn" title="Left-click: previous · Right-click: next">
+    <span class="vp-aspect-pct" id="vpAspectLabel">16:9</span>
+  </button>
+  <button class="mv-btn" data-act="video-fullscreen" title="Fullscreen">
+    <i class="bi bi-arrows-fullscreen"></i>
+  </button>
+</div>
+
+</div>
+  </div>
+
+  </div>
+<!-- ═══════════ VIDEO PLAYLIST PANEL ═══════════ -->
+<div class="panel-shell video-playlist-panel" id="videoPlaylistPanel" hidden>
+
+  <div class="panel-head" id="videoPlaylistHead">
+    <div class="vpl-title">
+      <span>Playlist</span>
+    </div>
+    <div class="panel-head-actions">
+      <button class="v-close" data-act="vpl-close" title="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-body" id="videoPlaylistBody"></div>
+
+  <div class="vpl-pager">
+    <button class="mv-pager-btn" data-act="vpl-prev-page" title="Previous" disabled>
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <span class="vpl-range" id="vplRange">1</span>
+    <button class="mv-pager-btn" data-act="vpl-next-page" title="Next" disabled>
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+
+</div>
+
+<!-- ═══════════ MUSIC PANEL ═══════════ -->
+<div class="panel-shell music-panel" id="musicPanel" hidden>
+
+  <div class="panel-head" id="musicPanelHead">
+    <div class="panel-search" id="musicUrlWrap" hidden>
+      <input class="panel-search-input" id="musicUrlInput" placeholder="Paste URL…">
+    </div>
+    <div class="panel-head-actions">
+      <button class="panel-icon-btn" data-act="music-plus" title="Add URL (left-click) or pick file (right-click)">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+      <button class="v-close" data-act="music-close" title="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-body music-body">
+
+    <!-- Visualizer -->
+    <div class="mv-now-row">
+    <div class="mv-now">
+    <div class="mv-visualizer" id="mvVisualizer">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
+    <div class="mv-controls">
+
+  <div class="mv-controls-left"></div>
+  <div class="vp-divider"></div>
+
+  <div class="mv-controls-center">
+    <button class="mv-btn" data-act="mp-prev" title="Previous"><i class="bi bi-skip-start-fill"></i></button>
+    <button class="mv-btn mv-play" data-act="mp-toggle" title="Play/Pause"><i class="bi bi-play-fill" id="mpPlayIcon"></i></button>
+    <button class="mv-btn" data-act="mp-next" title="Next"><i class="bi bi-skip-end-fill"></i></button>
+  </div>
+  <div class="vp-divider"></div>
+
+  <div class="mv-seek">
+    <span id="mpCur">0:00</span>
+    <input type="range" id="mpSeek" min="0" max="100" value="0">
+    <span id="mpDur">0:00</span>
+  </div>
+  <div class="vp-divider"></div>
+
+  <div class="mv-volume">
+    <button class="mv-btn mp-vol-btn" id="mpVolBtn" title="Left-click: down · Right-click: up"><i class="bi bi-volume-up" id="mpVolIcon"></i></button>
+    <span class="mp-vol-pct" id="mpVolPct">80%</span>
+  </div>
+  <div class="vp-divider"></div>
+
+  <div class="mv-controls-right">
+    <button class="mv-btn" data-act="mp-shuffle" title="Shuffle"><i class="bi bi-shuffle"></i></button>
+    <button class="mv-btn" data-act="mp-repeat" title="Repeat"><i class="bi bi-repeat"></i></button>
+  </div>
+
+</div>
+
+
+
+    <!-- Playlist -->
+    <div class="mv-playlist-wrap">
+      <div class="mv-playlist-head">
+        <span>Playlist</span>
+        <span class="mv-playlist-page" id="mpRange">1</span>
+      </div>
+      <div class="mv-playlist" id="mpPlaylist"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom pager bar — mirrors the video playlist panel's .vpl-pager -->
+  <div class="mv-pager" id="mvPager">
+    <button class="mv-pager-btn" data-act="mp-prev-page" title="Previous" disabled>
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <button class="mv-pager-btn" data-act="mp-next-page" title="Next" disabled>
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+
+</div>
+<!-- Hidden audio element -->
+<audio id="mpAudio" preload="metadata"></audio>
+
+<!-- ═══════════ VIDEO MINI PLAYER ═══════════ -->
+<div class="video-mini" id="videoMini" hidden>
+  <div class="video-mini-head" id="videoMiniHead">
+    <span class="video-mini-title" id="videoMiniTitle">Playing</span>
+    <button class="video-mini-close" id="videoMiniClose" title="Close">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <path d="M2 2L8 8M8 2L2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="video-mini-body" id="videoMiniBody"></div>
+</div>
+
+</body>
+</html>

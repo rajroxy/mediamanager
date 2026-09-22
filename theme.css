@@ -1,0 +1,427 @@
+/* ═══════════════════════════════════════════════════════════
+   ScriptForge — Theme
+   Vercel-inspired design tokens · Dark & Light
+   ═══════════════════════════════════════════════════════════ */
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  /* ── Typography ── */
+  --ui:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --display:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+
+  /* ── Light theme tokens ── */
+  --bg:#fafafa;
+  --surface-1:#ffffff;
+  --surface-2:#f5f5f5;
+  --surface-3:#ededed;
+  --surface-4:#e0e0e0;
+  --surface-5:#d4d4d4;
+  --overlay:rgba(0,0,0,.04);
+  --overlay-strong:rgba(0,0,0,.07);
+
+  --ink:#0a0a0a;
+  --ink-2:#525252;
+  --ink-3:#737373;
+  --ink-4:#a3a3a3;
+
+  --line:#e5e5e5;
+  --line-2:#d4d4d4;
+  --line-3:#a3a3a3;
+
+  --accent:#000000;
+  --accent-2:#262626;
+  --accent-soft:rgba(0,0,0,.06);
+  --accent-line:rgba(0,0,0,.16);
+  --accent-ink:#ffffff;
+  --grad:linear-gradient(135deg,#000000 0%,#404040 100%);
+
+  --ok:#16a34a;
+  --warn:#d97706;
+  --err:#dc2626;
+  --info:#2563eb;
+
+  --doc-bg:#ffffff;
+  --doc-ink:#171717;
+
+  --e-1:0 1px 2px rgba(0,0,0,.06);
+  --e-2:0 4px 12px rgba(0,0,0,.08);
+  --e-3:0 8px 24px rgba(0,0,0,.1);
+  --e-4:0 16px 40px rgba(0,0,0,.14);
+
+  /* ── Spacing (4px grid) ── */
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px;
+  --s-6:32px; --s-7:48px; --s-8:64px;
+
+  --r-sm:4px; --r-md:6px; --r-lg:8px; --r-xl:12px; --r-full:999px;
+
+  --t-fast:100ms;
+  --t-med:150ms;
+  --t-slow:220ms;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+
+  --topbar-h:44px;
+  --menubar-h:32px;
+  --toolbar-h:40px;
+  --ui-scale:1;
+
+  --shadow-intensity:1;
+  --surface-opacity:1;
+  --border-opacity:1;
+  --backdrop-blur:0px;
+  --panel-blur:0px;
+  --anim-speed:1;
+
+  /* ── Radius — Vercel is subtle, not fully sharp ── */
+  --r-sm:4px; --r-md:6px; --r-lg:8px; --r-xl:12px; --r-full:999px;
+
+  /* ── Motion — Vercel is snappy ── */
+  --t-fast:100ms;
+  --t-med:150ms;
+  --t-slow:220ms;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+
+  /* ── Chrome ── */
+  --topbar-h:44px;
+  --menubar-h:32px;
+  --toolbar-h:40px;
+  --ui-scale:1;
+
+  /* ── User-adjustable (settings.js controls these) ── */
+  --shadow-intensity:1;
+  --surface-opacity:1;
+  --border-opacity:1;
+  --backdrop-blur:0px;
+  --panel-blur:0px;
+  --anim-speed:1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACCENT OVERRIDE (user picks in Appearance settings)
+   ═══════════════════════════════════════════════════════════ */
+[data-accent]:not([data-accent=""]) {
+  /* Applied via JS: --accent, --accent-2, --accent-soft, --accent-line */
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DOCUMENT TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --doc-font:'Merriweather',Georgia,serif;
+  --doc-size:17px;
+  --doc-line:1.75;
+  --doc-track:0;
+  --doc-word:0;
+  --doc-para:14px;
+  --doc-max:760px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════ */
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:var(--ui);
+  background:var(--bg,#000);
+  color:var(--ink,#fafafa);
+  font-size:13.5px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  letter-spacing:-.01em;
+  transition:background var(--t-med) var(--ease),color var(--t-med) var(--ease);
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;letter-spacing:inherit;}
+input,select,textarea{font:inherit;color:inherit;background:none;border:none;outline:none;letter-spacing:inherit;}
+img{max-width:100%;display:block;}
+a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line-3);}
+a:hover{text-decoration:none;border-bottom-color:var(--ink);}
+
+/* ── Scrollbars — Vercel thin & subtle ── */
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{
+  background:var(--surface-4);
+  border-radius:4px;
+  border:2px solid transparent;
+  background-clip:padding-box;
+}
+::-webkit-scrollbar-thumb:hover{background:var(--surface-5);background-clip:padding-box;}
+
+/* ── Selection ── */
+::selection{background:var(--accent);color:var(--accent-ink);}
+
+/* ── Utility ── */
+.hidden{display:none!important;}
+[hidden]{display:none!important;}
+.flex{display:flex;}
+.col{flex-direction:column;}
+.center{align-items:center;justify-content:center;}
+.between{justify-content:space-between;}
+.gap-1{gap:var(--s-1);}
+.gap-2{gap:var(--s-2);}
+.gap-3{gap:var(--s-3);}
+.gap-4{gap:var(--s-4);}
+.grow{flex:1;}
+.muted{color:var(--ink-3);}
+.tiny{font-size:11px;}
+.small{font-size:12px;}
+.mono{font-family:var(--mono);}
+.spin{animation:spin 700ms linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Focus outline only for keyboard navigation (Tab), not mouse clicks */
+:focus-visible:not(input):not(textarea):not(select):not([contenteditable="true"]){
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+  border-radius:var(--r-sm);
+}
+
+/* Kill focus ring on mouse interaction for non-editable elements */
+button:focus:not(:focus-visible),
+div:focus:not(:focus-visible),
+span:focus:not(:focus-visible),
+a:focus:not(:focus-visible){
+  outline: none !important;
+}
+
+/* Editable elements keep a subtle ring */
+input:focus,
+textarea:focus,
+select:focus,
+[contenteditable="true"]:focus{
+  outline: none;
+}
+
+/* ── Reduce motion ── */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+}
+body.reduce-motion *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body.no-animations *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+
+/* ── Print ── */
+@media print{
+  .topbar,.menubar,.toolbar,.statusbar,.fab-wrap,.music-mini,.toast,.modal-root{display:none!important;}
+  .stage{padding:0!important;}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VERCEL-STYLE CONTROLS
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── TOGGLE ── compact, black/white, clean */
+.tgl{
+  width:36px;
+  height:20px;
+  background:var(--surface-4);
+  border:1px solid var(--line-2);
+  border-radius:999px;
+  position:relative;
+  cursor:pointer;
+  transition:background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+  flex-shrink:0;
+  padding:0;
+}
+.tgl::after{
+  content:'';
+  position:absolute;
+  top:2px;
+  left:2px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:var(--ink-2);
+  transition:transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+.tgl:hover{border-color:var(--line-3);}
+.tgl.on{
+  background:var(--accent);
+  border-color:var(--accent);
+}
+.tgl.on::after{
+  transform:translateX(16px);
+  background:var(--accent-ink);
+}
+
+/* Tab bar container — hide scrollbar */
+#setTabs{
+  scrollbar-width:none;
+}
+#setTabs::-webkit-scrollbar{display:none;}
+
+/* ── MODE PILLS ── clean, no accent tint */
+.mode-pill{
+  padding:6px 14px;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--ink-3);
+  font-size:12.5px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+  white-space:nowrap;
+}
+.mode-pill:hover{
+  background:var(--overlay);
+  color:var(--ink);
+}
+.mode-pill.active{
+  background:var(--surface-3);
+  color:var(--ink);
+  border-color:var(--line-2);
+  font-weight:500;
+}
+.mode-pill i{font-size:13px;color:inherit;}
+
+/* ── FORM INPUTS ── Vercel style */
+.inp,.sel,
+.tb-select,.tb-input,
+.ai-select,.ai-input,
+.music-add-input,
+.cmd-input,
+.beat-input,
+.col-title,
+.draft-card-title,
+.draft-card-body,
+.cast-name,
+.cast-details{
+  background:transparent;
+  border:1px solid var(--line-2);
+  border-radius:var(--r-sm);
+  color:var(--ink);
+  font-size:12.5px;
+  padding:8px 12px;
+  transition:border-color var(--t-fast) var(--ease);
+  outline:none;
+}
+.inp:hover,.sel:hover,
+.tb-select:hover,.tb-input:hover,
+.ai-select:hover,.ai-input:hover{
+  border-color:var(--line-3);
+}
+.inp:focus,.sel:focus,
+.tb-select:focus,.tb-input:focus,
+.ai-select:focus,.ai-input:focus,
+.music-add-input:focus{
+  border-color:var(--ink-3);
+}
+.inp::placeholder,
+.ai-input::placeholder{
+  color:var(--ink-4);
+}
+
+/* ── RANGE SLIDERS ── Vercel minimal */
+.rng{
+  width:150px;
+  height:4px;
+  background:var(--surface-4);
+  border-radius:2px;
+  -webkit-appearance:none;
+  appearance:none;
+  outline:none;
+  cursor:pointer;
+}
+.rng::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:var(--ink);
+  border:none;
+  cursor:pointer;
+  transition:transform var(--t-fast) var(--ease);
+}
+.rng::-webkit-slider-thumb:hover{transform:scale(1.15);}
+.rng::-moz-range-thumb{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:var(--ink);
+  border:none;
+  cursor:pointer;
+}
+
+/* ── COLOR INPUT ── */
+input[type="color"].inp{
+  padding:2px;
+  height:34px;
+  width:44px;
+  cursor:pointer;
+}
+
+/* ── SETTINGS TAB BUTTONS ── */
+.set-tab{
+  background:transparent;
+  border:none;
+  border-bottom:2px solid transparent;
+  padding:12px 16px;
+  margin-bottom:-1px;
+  font-size:12.5px;
+  font-weight:500;
+  color:var(--ink-3);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+  flex-shrink:0;
+  transition:color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.set-tab:hover{color:var(--ink);}
+.set-tab.active{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
+}
+.set-tab i{font-size:14px;color:inherit;flex-shrink:0;}
+
+/* ═══════════════════════════════════════════════════════════
+   NIGHT — the one and only theme
+   Warm, low-contrast, no pure black / no pure white.
+   Written on :root AND body so it applies no matter what
+   data-theme is set to (or if it's never set at all).
+   ═══════════════════════════════════════════════════════════ */
+:root, body{
+  color-scheme:dark;
+
+  --bg:#1b1a19;
+  --surface-1:#222120; --surface-2:#292725; --surface-3:#312e2c;
+  --surface-4:#3a3734; --surface-5:#454140;
+  --overlay:rgba(255,255,255,.05); --overlay-strong:rgba(255,255,255,.09);
+
+  --ink:#d9d3cb;      /* ~11:1 on --bg — body text  */
+  --ink-2:#b0aaa1;    /* ~7:1  — secondary text     */
+  --ink-3:#8b857c;    /* ~4:1  — icons, hints       */
+  --ink-4:#6a655e;    /* labels only, never prose   */
+
+  --line:#332f2c;     /* faintest divider           */
+  --line-2:#3e3a36;   /* card outlines              */
+  --line-3:#4c4741;   /* interactive outlines       */
+
+  --accent:#e6dfd5; --accent-2:#cfc7bb; --accent-ink:#1b1a19;
+  --accent-soft:rgba(230,223,213,.08); --accent-line:rgba(230,223,213,.22);
+  --grad:linear-gradient(135deg,#e6dfd5 0%,#b8b0a4 100%);
+
+  --ok:#7fb069; --warn:#e0a458; --err:#e07a5f; --info:#8ab4d8;
+
+  --doc-bg:#211f1d; --doc-ink:#d3cdc4;   /* the writing page */
+
+  --e-1:0 1px 2px rgba(0,0,0,.40); --e-2:0 4px 12px rgba(0,0,0,.45);
+  --e-3:0 8px 24px rgba(0,0,0,.50); --e-4:0 16px 40px rgba(0,0,0,.55);
+}
+
+/* native dark rendering — scrollbars, carets, selections, focus */
+html,body{ color-scheme:dark; }
+*{ scrollbar-color:var(--surface-4) var(--bg); }
+input, select, textarea, button{ accent-color:#fab387; }
+input, select, textarea{ caret-color:#fab387; }         /* warm peach caret */
+::selection{ background:#fab387; color:#211f1d; }       /* warm peach, not white */
+:focus-visible{ outline:2px solid #fab387; outline-offset:2px; }

@@ -1,0 +1,13 @@
+{
+  "name": "scriptforge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ScriptForge media player",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}

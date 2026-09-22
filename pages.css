@@ -1,0 +1,2446 @@
+/* ═══════════════════════════════════════════════════════════
+   ScriptForge — Pages
+   Vercel-style · All original classes preserved
+   ═══════════════════════════════════════════════════════════ */
+
+/* ═══ Page shell ═══ */
+.page-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 32px 16px;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.page-title{
+  font-size:22px;font-weight:600;
+  letter-spacing:-.03em;
+  display:flex;align-items:center;gap:12px;
+  color:var(--ink);
+}
+.page-title i{
+  font-size:20px;
+  color:var(--ink-3);
+}
+.page-sub{
+  font-size:12.5px;color:var(--ink-3);
+  margin-top:2px;
+}
+.page-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ═══════════════════════════════════════════════════════════
+   WRITE / EDITOR PAGE
+   ═══════════════════════════════════════════════════════════ */
+.write-wrap{
+  height:100%;
+  display:flex;flex-direction:column;
+  background:var(--doc-bg);
+  transition:background var(--t-med) var(--ease);
+}
+
+/* ─── Chapter / subchapter strip (between the header bar and the editor toolbar) ─── */
+.chapter-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  min-height:44px;              /* matches .write-toolbar height */
+  padding:8px 16px;             /* matches .write-toolbar horizontal padding */
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+}
+.chapter-control{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.chapter-control .tb-select{
+  height:28px;                  /* matches toolbar selects */
+  min-width:150px;
+  font-size:12.5px;
+}
+
+.chapter-control .icon-btn-sm{
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:var(--r-sm);
+  color:var(--ink-3);
+  transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease);
+}
+.chapter-control .icon-btn-sm:hover{background:var(--overlay);color:var(--ink);}
+
+.write-toolbar{
+  display:flex;align-items:center;gap:2px;
+  padding:8px 16px;
+  border-bottom:1px solid var(--line);
+  background:var(--bg);
+  flex-wrap:wrap;
+  min-height:44px;
+}
+
+.tb-group{
+  display:flex;align-items:center;gap:1px;
+  padding:0 8px;
+  border-right:1px solid var(--line);
+}
+.tb-group:last-child{border-right:none;}
+.tb-btn{
+  width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-3);
+  border-radius:var(--r-sm);
+  font-size:14px;
+  transition:all var(--t-fast) var(--ease);
+}
+.tb-btn:hover{background:var(--overlay);color:var(--ink);}
+.tb-btn.active{background:var(--surface-3);color:var(--ink);}
+.tb-select,.tb-input{
+  background:transparent;
+  border:1px solid var(--line-2);
+  color:var(--ink);
+  padding:5px 9px;
+  border-radius:var(--r-sm);
+  font-size:11.5px;
+  font-weight:400;
+  cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+}
+.tb-select:hover,.tb-input:hover{border-color:var(--line-3);}
+.tb-select:focus,.tb-input:focus{border-color:var(--ink-3);}
+.tb-input[type="number"]{width:52px;text-align:center;}
+
+.write-canvas{
+  flex:1;overflow-y:auto;
+  padding:32px 32px 200px;
+  background:var(--doc-bg);
+}
+.write-doc{
+  max-width:var(--doc-max);
+  margin:0 auto;
+  min-height:100%;
+  font-family:var(--doc-font);
+  font-size:var(--doc-size);
+  line-height:var(--doc-line);
+  letter-spacing:var(--doc-track);
+  word-spacing:var(--doc-word);
+  color:var(--doc-ink);
+  outline:none;
+  caret-color:var(--ink);
+}
+.write-doc p{margin-bottom:var(--doc-para);}
+.write-doc:empty::before{
+  content:attr(data-placeholder);
+  color:var(--ink-4);
+  pointer-events:none;
+}
+
+/* Mode-specific editor fonts */
+[data-mode="screenplay"] .write-doc{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.55;max-width:680px;}
+
+/* Screenplay elements */
+.write-doc .scene-heading{
+  text-transform:uppercase;font-weight:700;
+  margin:22px 0 10px;
+  border-bottom:1px solid var(--line-2);
+  padding-bottom:4px;
+}
+.write-doc .character-name{
+  text-transform:uppercase;text-align:center;
+  margin:16px 0 0;font-weight:700;
+}
+.write-doc .dialogue{margin:0 90px 4px;}
+.write-doc .parenthetical{margin:0 120px;font-style:italic;}
+.write-doc .action{margin-bottom:14px;}
+.write-doc .transition{
+  text-align:right;text-transform:uppercase;
+  font-weight:700;margin:16px 0 10px;
+}
+.write-doc .stanza{margin-bottom:20px;font-style:italic;}
+
+/* Layout variants */
+[data-layout="wide"] .write-doc{max-width:1100px;}
+[data-layout="narrow"] .write-doc{max-width:540px;}
+[data-layout="fullbleed"] .write-canvas{padding-left:12px;padding-right:12px;}
+[data-layout="fullbleed"] .write-doc{max-width:100%;}
+[data-layout="typewriter"] .write-canvas{padding-top:40vh;padding-bottom:40vh;}
+[data-layout="twocolumn"] .write-doc{column-count:2;column-gap:32px;max-width:1000px;}
+[data-layout="newspaper"] .write-doc{column-count:2;column-gap:28px;max-width:900px;}
+
+/* ═══════════════════════════════════════════════════════════
+   READ PAGE
+   ═══════════════════════════════════════════════════════════ */
+.read-wrap{
+  height:100%;display:flex;flex-direction:column;
+  background:var(--bg);
+}
+.read-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 24px;
+  border-bottom:1px solid var(--line);
+  background:var(--bg);
+}
+.read-body{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:32px 24px;
+  overflow:hidden;
+}
+.read-page{
+  max-width:760px;width:100%;
+  max-height:100%;
+  background:var(--doc-bg);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:56px 64px;
+  overflow-y:auto;
+  font-family:'Merriweather',Georgia,serif;
+  font-size:18px;line-height:1.85;
+  color:var(--doc-ink);
+}
+.read-page h1{
+  font-size:28px;
+  text-align:center;margin-bottom:14px;
+  font-weight:600;letter-spacing:-.02em;
+}
+.read-page h2{
+  font-size:20px;
+  margin:32px 0 12px;font-weight:600;
+}
+.read-page p{margin-bottom:16px;hyphens:auto;}
+.read-page .scene-heading{
+  text-transform:uppercase;font-weight:700;
+  margin:22px 0 10px;font-family:'Courier Prime',monospace;font-size:15px;
+}
+.read-page .dialogue{margin:0 80px;font-family:'Courier Prime',monospace;font-size:15px;}
+.read-page .character-name{
+  text-transform:uppercase;text-align:center;
+  font-family:'Courier Prime',monospace;font-size:15px;font-weight:700;
+}
+.read-page .stanza{margin-bottom:24px;font-style:italic;}
+.read-foot{
+  display:flex;align-items:center;justify-content:center;gap:24px;
+  padding:12px 24px;
+  border-top:1px solid var(--line);
+  background:var(--bg);
+  font-size:12.5px;color:var(--ink-3);
+}
+.read-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:44px;height:44px;border-radius:50%;
+  background:var(--surface-2);border:1px solid var(--line-2);
+  color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  transition:all var(--t-fast) var(--ease);
+}
+.read-nav:hover{background:var(--surface-3);color:var(--ink);}
+.read-nav.prev{left:24px;}
+.read-nav.next{right:24px;}
+.read-progress{
+  flex:1;max-width:400px;height:2px;
+  background:var(--surface-3);border-radius:1px;
+  overflow:hidden;
+}
+.read-progress-fill{
+  height:100%;background:var(--ink);
+  transition:width var(--t-med) var(--ease);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAFT / NOTES / PROJECT CARDS
+   ═══════════════════════════════════════════════════════════ */
+.draft-wrap{
+  height:100%;overflow-y:auto;
+  padding:24px 32px 200px;
+}
+.draft-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:16px;
+  margin-top:16px;
+}
+.draft-card{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:16px;
+  display:flex;flex-direction:column;gap:12px;
+  transition:all var(--t-fast) var(--ease);
+}
+.draft-card:hover{border-color:var(--line-3);}
+.draft-card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+}
+.draft-card-title{
+  font-weight:600;font-size:13px;
+  background:transparent;border:none;
+  color:var(--ink);width:100%;
+}
+.draft-card-title:focus{outline:none;}
+.draft-card-body{
+  font-size:12.5px;line-height:1.6;
+  color:var(--ink-2);
+  background:transparent;border:none;
+  width:100%;resize:vertical;min-height:80px;
+  font-family:inherit;
+}
+.draft-card-body:focus{outline:none;}
+.draft-card-meta{
+  font-size:10.5px;color:var(--ink-4);
+  display:flex;justify-content:space-between;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   OUTLINE / BEAT
+   ═══════════════════════════════════════════════════════════ */
+.plan-wrap{
+  height:100%;overflow-y:auto;
+  padding:24px 32px 200px;
+}
+.beat{
+  display:flex;align-items:center;gap:8px;
+  padding:12px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  margin-bottom:6px;
+  transition:all var(--t-fast) var(--ease);
+}
+.beat:hover{border-color:var(--line-3);}
+.beat-input{
+  flex:1;
+  font-size:13px;font-weight:400;
+  color:var(--ink);
+  padding:4px 6px;
+}
+.beat-input:focus{outline:none;}
+.beat-type{
+  background:var(--surface-3);
+  border:1px solid var(--line);
+  color:var(--ink-3);
+  padding:4px 8px;border-radius:var(--r-sm);
+  font-size:10.5px;font-weight:500;
+  cursor:pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KANBAN / BOARD
+   ═══════════════════════════════════════════════════════════ */
+.board-wrap{
+  height:100%;overflow-x:auto;
+  padding:24px 32px 200px;
+  display:flex;gap:16px;
+  align-items:flex-start;
+}
+.col{
+  flex:0 0 280px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:12px;
+  display:flex;flex-direction:column;
+  max-height:calc(100vh - var(--topbar-h) - 200px);
+}
+.col-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+  padding-bottom:12px;
+}
+.col-title{
+  font-size:13px;font-weight:600;
+  color:var(--ink);flex:1;
+  padding:4px 6px;
+}
+.col-title:focus{outline:none;}
+.col-count{
+  font-size:10.5px;font-weight:500;
+  color:var(--ink-3);
+  background:var(--surface-3);
+  padding:2px 8px;border-radius:var(--r-full);
+}
+.col-body{
+  flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:8px;
+  padding-right:2px;
+}
+.col-body.dragover{background:var(--overlay);border-radius:var(--r-sm);}
+.kcard{
+  background:var(--surface-1);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:12px;
+  cursor:grab;
+  transition:all var(--t-fast) var(--ease);
+  font-size:12.5px;
+}
+.kcard:hover{border-color:var(--line-3);}
+.kcard.dragging{opacity:.4;}
+.kcard-title{font-weight:500;color:var(--ink);margin-bottom:4px;}
+.kcard-desc{color:var(--ink-3);font-size:11.5px;line-height:1.5;}
+
+/* ═══════════════════════════════════════════════════════════
+   TIMELINE
+   ═══════════════════════════════════════════════════════════ */
+.time-wrap{
+  height:100%;overflow-y:auto;
+  padding:32px 32px 200px;
+}
+.time-track{position:relative;padding-left:60px;max-width:900px;margin:0 auto;}
+.time-track::before{
+  content:'';position:absolute;
+  left:24px;top:20px;bottom:20px;
+  width:1px;background:var(--line-2);
+}
+.time-event{
+  position:relative;
+  margin-bottom:24px;
+}
+.time-dot{
+  position:absolute;left:-42px;top:12px;
+  width:10px;height:10px;border-radius:50%;
+  background:var(--ink);
+}
+.time-card{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:16px;
+}
+.time-card-title{font-weight:600;font-size:14px;color:var(--ink);}
+.time-card-date{
+  display:inline-block;
+  font-size:10.5px;font-weight:500;
+  color:var(--ink-2);
+  background:var(--surface-3);
+  padding:2px 8px;border-radius:var(--r-full);
+  margin-top:4px;
+}
+.time-card-desc{
+  font-size:12.5px;color:var(--ink-2);
+  line-height:1.6;margin-top:8px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BIBLE / CAST
+   ═══════════════════════════════════════════════════════════ */
+.cast-wrap{
+  height:100%;overflow-y:auto;
+  padding:24px 32px 200px;
+}
+.cast-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:12px;
+}
+.cast-card{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:16px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.cast-head{
+  display:flex;align-items:center;gap:12px;
+}
+.cast-avatar{
+  width:40px;height:40px;border-radius:var(--r-md);
+  background:var(--surface-3);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-2);font-size:16px;font-weight:600;
+  flex-shrink:0;
+}
+.cast-name{
+  font-size:14px;font-weight:600;color:var(--ink);
+  background:transparent;border:none;width:100%;
+}
+.cast-name:focus{outline:none;}
+.cast-details{
+  font-size:12px;color:var(--ink-2);line-height:1.55;
+  background:transparent;border:none;
+  width:100%;min-height:60px;resize:vertical;
+  font-family:inherit;
+}
+.cast-details:focus{outline:none;}
+
+/* ═══════════════════════════════════════════════════════════
+   RESEARCH / REFERENCES
+   ═══════════════════════════════════════════════════════════ */
+.research-wrap{
+  height:100%;overflow-y:auto;
+  padding:24px 32px 200px;
+}
+.ref-list{display:flex;flex-direction:column;gap:12px;}
+.ref-card{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:16px;
+  transition:all var(--t-fast) var(--ease);
+}
+.ref-card:hover{border-color:var(--line-3);}
+.ref-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px;
+}
+.ref-icon{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--ink-2);font-size:16px;
+  background:var(--surface-3);
+}
+.ref-body{flex:1;min-width:0;}
+.ref-title{font-size:13.5px;font-weight:600;color:var(--ink);}
+.ref-url{
+  font-size:11px;color:var(--ink-3);
+  margin-top:4px;word-break:break-all;
+  display:block;
+}
+.ref-preview{
+  font-size:12px;color:var(--ink-3);
+  line-height:1.55;margin-top:8px;
+  max-height:60px;overflow:hidden;
+}
+.ref-actions{display:flex;gap:4px;}
+.ref-act{
+  width:30px;height:30px;border-radius:var(--r-sm);
+  color:var(--ink-3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;
+  transition:all var(--t-fast) var(--ease);
+}
+.ref-act:hover{background:var(--overlay);color:var(--ink);}
+.ref-act.danger:hover{background:var(--err);color:#fff;}
+
+/* ═══════════════════════════════════════════════════════════
+   CANVAS PAGE
+   ═══════════════════════════════════════════════════════════ */
+.canvas-wrap{
+  height:100%;display:flex;flex-direction:column;
+}
+.canvas-tools{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.canvas-stage{
+  flex:1;position:relative;
+  background:var(--bg);
+  overflow:hidden;
+  touch-action:none;
+}
+.canvas-stage canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+/* ═══════════════════════════════════════════════════════════
+   SETTINGS / CARDS / ROWS
+   ═══════════════════════════════════════════════════════════ */
+/* Compact set-cards on stats page */
+.stats-body .set-card{
+  padding:12px 14px;
+  margin-bottom:0;
+}
+.stats-body .set-card-title{
+  margin-bottom:8px;
+  font-size:10px;
+}
+.set-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+  gap:16px;
+}
+.set-row:last-child{border-bottom:none;padding-bottom:0;}
+.set-row:first-of-type{padding-top:0;}
+.set-label{font-size:13px;font-weight:500;color:var(--ink);}
+.set-desc{font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.4;}
+.set-ctrl{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.inp,.sel{
+  background:transparent;
+  border:1px solid var(--line-2);
+  color:var(--ink);
+  padding:8px 12px;
+  border-radius:var(--r-sm);
+  font-size:12.5px;
+  font-weight:400;
+  transition:all var(--t-fast) var(--ease);
+}
+.inp:focus,.sel:focus{border-color:var(--ink-3);}
+.inp.sm{width:80px;}
+.inp.tiny{width:60px;text-align:center;}
+.rng{width:150px;height:4px;accent-color:var(--ink);}
+.rng-val{
+  min-width:44px;font-size:11.5px;font-weight:500;
+  color:var(--ink-2);text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+/* Toggle */
+.tgl{
+  width:36px;height:20px;
+  background:var(--surface-4);
+  border:1px solid var(--line);
+  border-radius:10px;position:relative;
+  cursor:pointer;
+  transition:background var(--t-med) var(--ease);
+  flex-shrink:0;
+}
+.tgl::after{
+  content:'';position:absolute;
+  top:1px;left:1px;width:16px;height:16px;
+  border-radius:50%;background:#fff;
+  transition:transform var(--t-med) var(--ease);
+}
+.tgl.on{background:var(--accent);border-color:var(--accent);}
+.tgl.on::after{transform:translateX(16px);}
+
+/* ═══════════════════════════════════════════════════════════
+   CHIPS / TILES / GRIDS
+   ═══════════════════════════════════════════════════════════ */
+.chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{
+  padding:6px 14px;
+  background:transparent;
+  border:1px solid var(--line-2);
+  color:var(--ink-2);
+  border-radius:var(--r-full);
+  font-size:12px;font-weight:500;
+  transition:all var(--t-fast) var(--ease);
+  cursor:pointer;
+}
+.chip:hover{border-color:var(--line-3);color:var(--ink);}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+
+.grid-auto{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:12px;
+}
+.tile{
+  padding:16px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+  text-align:center;
+}
+.tile:hover{border-color:var(--line-3);background:var(--surface-3);}
+.tile.on{border-color:var(--ink-3);background:var(--surface-3);}
+
+.empty{
+  padding:48px 24px;
+  text-align:center;
+  color:var(--ink-3);
+  font-size:13px;
+  line-height:1.6;
+}
+.empty i{
+  display:block;font-size:40px;margin-bottom:12px;
+  color:var(--ink-4);
+}
+
+.page .toast{bottom:100px;}
+
+/* ═══════════════════════════════════════════════════════════
+   HOME — floating menu button
+   ═══════════════════════════════════════════════════════════ */
+.home-menu-btn{
+  position:fixed;
+  bottom:16px;left:16px;
+  z-index:120;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;
+  background:transparent;
+  border:1px solid var(--line-2);
+  border-radius:var(--r-sm);
+  color:var(--ink-2);
+  font-size:12.5px;font-weight:500;
+  cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+}
+.home-menu-btn:hover{
+  background:var(--overlay);
+  border-color:var(--line-3);
+  color:var(--ink);
+}
+.home-menu-btn i{font-size:15px;}
+
+/* ═══════════════════════════════════════════════════════════
+   PROJECT ROW — selectable (stats show in the panel on the right)
+   ═══════════════════════════════════════════════════════════ */
+.proj-item-wrap{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  margin-bottom:8px;
+  overflow:hidden;
+  transition:border-color 200ms var(--ease);
+}
+.proj-row{
+  display:flex;align-items:center;
+  padding-right:12px;
+  transition:background 120ms var(--ease);
+}
+.proj-row:hover{background:var(--overlay);}
+.proj-row.active{background:var(--overlay-strong);}
+.proj-item{
+  flex:1;min-width:0;
+  display:flex;align-items:center;gap:14px;
+  padding:14px 8px 14px 16px;
+  cursor:pointer;
+}
+/* Rename / Delete — the music & video playlist ghost buttons: 22px, borderless,
+   fading in on row hover */
+.proj-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;padding-right:2px;}
+.proj-btn{
+  width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;
+  border:none;
+  color:var(--ink-4);
+  padding:0;
+  cursor:pointer;
+  border-radius:var(--r-sm);
+  opacity:0;
+  pointer-events:none;
+  flex-shrink:0;
+  transition:opacity 120ms var(--ease),background 100ms var(--ease),color 100ms var(--ease);
+}
+.proj-row:hover .proj-btn,
+.proj-row.active .proj-btn{opacity:1;pointer-events:auto;}
+/* icon metrics identical to the playlist row buttons */
+.proj-btn i{font-size:11px;line-height:1;display:block;}
+.proj-btn svg{display:block;}
+.proj-btn:hover{background:var(--overlay-strong);color:var(--ink);}
+/* Category row — tiles on the left, project stats fill the space to the right */
+.cat-row{
+  display:flex;
+  align-items:stretch;
+  gap:8px;
+  flex-wrap:nowrap;   /* the stats card stays to the right of the last tile */
+}
+.cat-row .pages-grid{flex:0 0 auto;min-width:0;}
+.cat-stats{
+  flex:0 1 270px;      /* shrinks a touch instead of dropping below the tiles */
+  width:270px;
+  min-width:180px;
+  max-width:100%;
+  padding:14px 16px;
+  /* its own left edge is the vertical divider after the last tile */
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+/* label top-left · created date top-right */
+.cat-stats-top{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.cat-stats-head{
+  display:flex;align-items:center;gap:8px;
+  font-size:10.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-4);
+}
+.cat-stats-head i{font-size:13px;}
+.cat-stats-empty{
+  font-size:12px;color:var(--ink-4);
+  line-height:1.5;
+}
+.cat-stats-bottom{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+  margin-top:auto;
+  padding-bottom:2px;
+}
+.cat-stat{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.cat-stat-right{text-align:right;}
+.cat-stat-right .cat-stat-lbl{text-align:right;}
+/* top-right created date — wraps as “September / 17, 2026” */
+.cat-stat-created{max-width:106px;}
+.cat-stat-val{
+  font-size:20px;font-weight:600;color:var(--ink);
+  font-variant-numeric:tabular-nums;line-height:1.1;
+}
+.cat-stat-val-sm{
+  font-size:12.5px;font-weight:500;color:var(--ink-2);
+  font-family:var(--mono);
+  line-height:1.5;
+}
+.cat-stat-lbl{
+  font-size:9.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-4);
+}
+/* On narrow screens the card goes under the tiles rather than off-screen */
+@media (max-width:900px){
+  .cat-row{flex-wrap:wrap;}
+  .cat-stats{flex:1 1 100%;width:auto;min-width:0;max-width:none;}
+}
+.proj-body{flex:1;min-width:0;}
+.proj-source{
+  font-size:10.5px;font-weight:400;
+  color:var(--ink-4);letter-spacing:.01em;line-height:1.2;
+  margin-top:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.proj-row.active .proj-source{color:var(--ink-3);}
+
+/* ═══════════════════════════════════════════════════════════
+   STATS PAGE — full-width, non-scrolling
+   ═══════════════════════════════════════════════════════════ */
+.stats-page{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  padding:8px 32px 20px;
+  overflow:hidden;
+}
+
+.stats-top{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:12px;
+  flex-shrink:0;
+  padding-top:0;
+}
+.stats-drops{
+  display:flex;
+  gap:20px;
+  flex:1;
+}
+/* Vercel-style category card — same look as the Settings/Player boxes.
+   Title row on top, scrollable option list below; extra entries can be
+   added inside .stats-cat-list later without any other change. */
+.stats-cat-card{
+  background:var(--surface-1);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  overflow:visible;
+  min-width:220px;
+  flex:1;
+  max-width:280px;
+  align-self:flex-start;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+.stats-cat-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  padding:10px 14px;
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--ink);
+  background:var(--surface-2);
+  border:0;
+  border-bottom:1px solid transparent;
+  font-family:inherit;
+  text-align:left;
+  letter-spacing:-.01em;
+  cursor:pointer;
+  transition:background 100ms var(--ease);
+}
+.stats-cat-title:hover{ background:var(--surface-3); }
+.stats-cat-title i{
+  font-size:14px;
+  color:var(--ink-3);
+}
+.stats-cat-value{
+  margin-left:auto;
+  font-weight:400;
+  font-size:12px;
+  color:var(--ink-3);
+}
+.stats-cat-caret{
+  font-size:11px !important;
+  transition:transform 140ms var(--ease);
+}
+.stats-cat-card.open .stats-cat-caret{ transform:rotate(180deg); }
+.stats-cat-list{
+  display:none;
+  flex-direction:column;
+  padding:6px;
+  gap:2px;
+  max-height:150px;
+  overflow-y:auto;
+  border-bottom:0;
+}
+.stats-cat-card.open .stats-cat-title{ border-bottom:0; }
+.stats-cat-card.open .stats-cat-list{
+  display:flex;
+  position:absolute;
+  top:calc(100% - 1px);
+  left:-1px;
+  right:-1px;
+  background:var(--surface-1);
+  border:1px solid var(--line-2);
+  border-top:0;
+  border-radius:0 0 var(--r-md) var(--r-md);
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+  z-index:50;
+}
+.stats-cat-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:7px 10px;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--ink-2);
+  font-size:12.5px;
+  font-family:inherit;
+  cursor:pointer;
+  text-align:left;
+  transition:background 100ms var(--ease), color 100ms var(--ease);
+}
+.stats-cat-item:hover{
+  background:var(--surface-2);
+  color:var(--ink);
+}
+.stats-cat-item i{
+  font-size:12px;
+  color:var(--ink-3);
+  opacity:0;
+  transition:opacity 100ms var(--ease);
+}
+.stats-cat-item.active{
+  background:var(--surface-2);
+  color:var(--ink);
+  font-weight:600;
+}
+.stats-cat-item.active i{ opacity:1; }
+
+.stats-empty{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  color:var(--ink-3);
+  padding:60px 0 0;
+}
+.stats-empty-icon{
+  font-size:40px;
+  color:var(--ink-4);
+}
+.stats-empty-text{
+  font-size:13px;
+  color:var(--ink-3);
+}
+.stats-body{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  overflow:hidden;
+}
+.stats-context{
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--ink-4);
+  margin-bottom:-4px;
+}
+
+/* KPI row */
+.stats-grid-kpi{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  flex-shrink:0;
+  margin-bottom:10px;
+}
+.stat-card-lg{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.stat-ico{
+  font-size:14px;
+  color:var(--ink-3);
+  margin-bottom:2px;
+}
+.stat-big{
+  font-size:20px;
+  font-weight:600;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+  line-height:1.1;
+  letter-spacing:-.02em;
+}
+.stat-big-sm{
+  font-size:28px;
+  font-weight:600;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+}
+.stat-sub{
+  font-size:13px;
+  color:var(--ink-3);
+}
+.stat-lbl{
+  font-size:9.5px;
+  font-weight:500;
+  color:var(--ink-4);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+/* Mid row — goal + streak */
+.stats-grid-mid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  flex-shrink:0;
+  margin-bottom:10px;
+}
+.stat-row-big{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin:8px 0;
+}
+.stat-bar{
+  height:6px;
+  background:var(--surface-4);
+  border-radius:3px;
+  overflow:hidden;
+  margin-bottom:8px;
+}
+.stat-bar-fill{
+  height:100%;
+  background:var(--accent);
+  transition:width var(--t-med) var(--ease);
+}
+.stat-hint{
+  font-size:11.5px;
+  color:var(--ink-3);
+}
+
+@media (max-width:1100px){
+  .stats-grid-kpi{grid-template-columns:repeat(2,1fr);}
+  .stats-grid-mid{grid-template-columns:1fr;}
+  .stats-grid-content{grid-template-columns:repeat(4,1fr);}
+}
+
+.stats-body .set-card{
+  padding:12px 14px;
+  margin:0;
+}
+.stats-body .set-card-title{
+  margin-bottom:8px;
+  font-size:10px;
+}
+.stats-grid-mid .set-card{
+  min-height:100px;
+}
+/* ═══ STATS — force card appearance ═══ */
+.stats-body .set-card{
+  background:var(--surface-2) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--r-md) !important;
+  padding:14px 16px !important;
+  margin:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+}
+
+.stats-body .set-card-title{
+  font-size:10.5px !important;
+  font-weight:600 !important;
+  text-transform:uppercase !important;
+  letter-spacing:.08em !important;
+  color:var(--ink-4) !important;
+  margin:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+}
+
+.stat-card-lg{
+  background:var(--surface-2) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--r-md) !important;
+  padding:14px 16px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:2px !important;
+}
+
+.stat-mini{
+  background:var(--surface-3) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--r-sm) !important;
+  padding:10px 8px !important;
+  text-align:center !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:2px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATS WAVE CHART + INFO — clean
+   ═══════════════════════════════════════════════════════════ */
+
+/* Chart card */
+.stats-body > .set-card.stats-chart-card{
+  flex:1 1 auto;
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:14px 16px;
+  margin:0;
+}
+
+/* Row (chart + info) — no separate clipping */
+.stats-chart-row{
+  flex:1;
+  min-height:0;
+  display:flex;
+  gap:16px;
+  margin-top:8px;
+}
+
+/* Wave — plain container, SVG fills it */
+.stats-wave{
+  flex:1;
+  min-width:0;
+  height:100%;
+  position:relative;
+}
+
+/* SVG — no border-radius, no clipping needed */
+.stats-wave svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* Empty state */
+.wave-empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  height:100%;
+  color:var(--ink-3);
+  text-align:center;
+}
+.wave-empty i{font-size:28px;color:var(--ink-4);margin-bottom:4px;}
+.wave-empty-title{font-size:13px;font-weight:500;color:var(--ink-2);}
+.wave-empty-sub{font-size:11.5px;color:var(--ink-4);}
+
+/* Info column */
+.stats-wave-info{
+  flex:0 0 100px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:6px;
+  padding:10px 0 10px 12px;
+  position:relative;
+}
+.stats-wave-info::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:10px;
+  bottom:10px;
+  width:1px;
+  background:var(--line-2);
+}
+.stats-wave-info-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:8px;
+}
+.stats-wave-info-lbl{
+  font-size:10px;
+  font-weight:500;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--ink-4);
+}
+.stats-wave-info-val{
+  font-size:14px;
+  font-weight:600;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+/* Wrapper provides the rounded clip (works around Firefox bug) */
+.stats-chart-wrap{
+  flex:1 1 auto;
+  min-height:180px;
+  border-radius:var(--r-md);
+  overflow:hidden;
+  display:flex;
+}
+
+.stats-chart-wrap > .set-card.stats-chart-card{
+  flex:1;
+  min-height:0;
+  border-radius:0 !important;
+  overflow:hidden;
+  margin:0 !important;
+}
+/* ═══ Toolbar dropdown (tb-drop) — FINAL, self-contained ═══ */
+.tb-drop{ position:relative; display:inline-flex; }
+
+.tb-drop-list{
+  display:none !important;
+  flex-direction:column !important;
+  flex-wrap:nowrap !important;
+  align-items:stretch !important;
+  gap:2px;
+  padding:6px;
+  max-height:300px;
+  overflow-y:auto;
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0; right:auto;
+  width:max-content;
+  min-width:100%;
+  max-width:320px;
+  background:var(--surface-1);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  box-shadow:0 12px 32px rgba(0,0,0,.14), 0 2px 6px rgba(0,0,0,.06);
+  z-index:120;
+}
+.tb-drop.open .tb-drop-list{ display:flex !important; }
+
+.tb-drop-list > *{ width:100%; flex:0 0 auto !important; }
+
+.tb-drop-item{
+  display:flex !important;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:7px 10px;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--ink-2);
+  font-size:12.5px;
+  font-family:inherit;
+  text-align:left;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.tb-drop-item:hover{ background:var(--surface-2); color:var(--ink); }
+
+.tb-drop-item i{ opacity:0 !important; font-size:12px; color:var(--ink-3); }
+.tb-drop-item.active{ background:var(--surface-2); color:var(--ink); font-weight:600; }
+.tb-drop-item.active i{ opacity:1 !important; }
+
+/* ═══ Chapter / subchapter dropdown — toolbar-dropdown look, own classes
+       so it can't collide with the Font/Block dropdown handlers ═══ */
+.tb-drop{ position:relative; }              /* already set — safe to repeat */
+
+.tb-drop2-title{
+  display:flex; align-items:center; gap:7px;
+  min-width:150px; padding:5px 10px;
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  color:var(--ink); font-family:inherit; font-size:12.5px; font-weight:600;
+  letter-spacing:-.01em; text-align:left; cursor:pointer;
+  transition:background 100ms var(--ease), border-color 100ms var(--ease);
+}
+.tb-drop2-title:hover{ background:var(--surface-3); border-color:var(--line-3); }
+.tb-drop2-title:disabled{ opacity:.55; cursor:default; }
+.tb-drop2-title > i:first-child{ font-size:13px; color:var(--ink-3); flex-shrink:0; }
+.tb-drop2-value{
+  flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-weight:400; color:var(--ink-3);
+}
+.tb-drop2-caret{ font-size:11px !important; color:var(--ink-3); transition:transform 140ms var(--ease); }
+.tb-drop.open .tb-drop2-caret{ transform:rotate(180deg); }
+
+.tb-drop2-list{
+  display:none; flex-direction:column; gap:2px; padding:6px;
+  position:absolute; top:calc(100% + 6px); left:0;
+  min-width:100%; width:max-content; max-width:320px;
+  max-height:300px; overflow-y:auto;
+  background:var(--surface-1);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  box-shadow:0 12px 32px rgba(0,0,0,.14), 0 2px 6px rgba(0,0,0,.06);
+  z-index:120;
+}
+.tb-drop.open .tb-drop2-list{ display:flex; }
+
+.tb-drop2-item{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:7px 10px; border:1px solid transparent; border-radius:var(--r-sm);
+  background:transparent; color:var(--ink-2);
+  font-family:inherit; font-size:12.5px; text-align:left; white-space:nowrap; cursor:pointer;
+  transition:background 100ms var(--ease), color 100ms var(--ease);
+}
+.tb-drop2-item:hover{ background:var(--surface-2); color:var(--ink); }
+.tb-drop2-item i{ opacity:0; font-size:12px; color:var(--ink-3); transition:opacity 100ms var(--ease); }
+.tb-drop2-item.active{ background:var(--surface-2); color:var(--ink); font-weight:600; }
+.tb-drop2-item.active i{ opacity:1; }
+
+/* The real <select> stays in the DOM and stays functional — just invisible */
+.tb-select.tb-native-hidden{
+  position:absolute !important;
+  width:1px; height:1px; margin:-1px; padding:0; border:0;
+  opacity:0; pointer-events:none; overflow:hidden; clip-path:inset(50%);
+}
+/* ═══ Font + Paragraph dropdowns — match the Chapter/Subchapter ones ═══ */
+.tb-drop{ position:relative; display:inline-flex; align-items:stretch; }
+
+.tb-drop-title,
+.tb-drop2-title{                 /* title box */
+  display:flex; align-items:center; gap:7px;
+  min-width:150px; padding:5px 10px;
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  color:var(--ink);
+  font-family:inherit; font-size:12.5px; font-weight:600; letter-spacing:-.01em;
+  text-align:left; cursor:pointer;
+  transition:background 100ms var(--ease), border-color 100ms var(--ease);
+}
+.tb-drop-title:hover{ background:var(--surface-3); border-color:var(--line-3); }
+.tb-drop-title > i:first-child{ font-size:13px; color:var(--ink-3); flex-shrink:0; }
+
+.tb-drop-value{
+  flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-weight:400; color:var(--ink-3);
+}
+.tb-drop-caret{
+  margin-left:auto; font-size:11px !important; color:var(--ink-3);
+  transition:transform 140ms var(--ease);
+}
+.tb-drop.open .tb-drop-caret{ transform:rotate(180deg); }
+
+.tb-drop-list{
+  display:none !important;
+  flex-direction:column !important;
+  flex-wrap:nowrap !important;
+  align-items:stretch !important;
+  gap:2px; padding:6px;
+  position:absolute; top:calc(100% + 6px); left:0; right:auto;
+  width:max-content; min-width:100%; max-width:320px;
+  max-height:300px; overflow-y:auto;
+  background:var(--surface-1);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  box-shadow:0 12px 32px rgba(0,0,0,.14), 0 2px 6px rgba(0,0,0,.06);
+  z-index:120;
+}
+.tb-drop.open .tb-drop-list{ display:flex !important; }
+.tb-drop-list > *{ width:100%; flex:0 0 auto !important; }
+
+.tb-drop-group{                  /* the Serif / Sans / Mono headings */
+  width:100%; padding:7px 10px 3px;
+  font-size:9.5px; font-weight:600; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink-4);
+}
+
+.tb-drop-item{
+  display:flex !important; align-items:center; justify-content:space-between; gap:10px;
+  width:100%; padding:7px 10px;
+  background:transparent; border:1px solid transparent; border-radius:var(--r-sm);
+  color:var(--ink-2); font-family:inherit; font-size:12.5px;
+  text-align:left; white-space:nowrap; cursor:pointer;
+  transition:background 100ms var(--ease), color 100ms var(--ease);
+}
+.tb-drop-item:hover{ background:var(--surface-2); color:var(--ink); }
+.tb-drop-item.active{ background:var(--surface-2); color:var(--ink); font-weight:600; }
+.tb-drop-item i{ font-size:12px; color:var(--ink-3); opacity:0 !important; }
+.tb-drop-item.active i{ opacity:1 !important; }
+/* ═══ Toolbar controls — same box language as Chapter / Font / Paragraph ═══ */
+
+/* groups + dividers */
+.write-toolbar .tb-group{
+  display:flex; align-items:center; gap:4px;
+  padding:0 8px; height:100%;
+  border-right:1px solid var(--line);
+}
+.write-toolbar .tb-group:last-child{ border-right:none; }
+
+/* 1. Icon buttons → small soft squares */
+.write-toolbar .tb-btn{
+  width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-sm);
+  color:var(--ink-2);
+  font-size:14px;
+  transition:background 100ms var(--ease), border-color 100ms var(--ease), color 100ms var(--ease);
+}
+.write-toolbar .tb-btn:hover{
+  background:var(--surface-3);
+  border-color:var(--line-3);
+  color:var(--ink);
+}
+.write-toolbar .tb-btn.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--accent-ink);
+}
+
+/* 2. Font size → same card as the dropdown titles, no OS spinner */
+.write-toolbar .tb-input[type="number"]{
+  width:46px; height:28px;
+  padding:0 6px;
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  color:var(--ink);
+  font-size:12.5px; font-weight:600;
+  text-align:center;
+  cursor:pointer;
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+.write-toolbar .tb-input[type="number"]::-webkit-outer-spin-button,
+.write-toolbar .tb-input[type="number"]::-webkit-inner-spin-button{
+  -webkit-appearance:none; appearance:none; margin:0;
+}
+.write-toolbar .tb-input[type="number"]:hover{
+  background:var(--surface-3); border-color:var(--line-3);
+}
+
+/* 3. Colour pickers → swatch sitting inside the same box */
+.write-toolbar .tb-color{
+  width:28px; height:28px;
+  padding:3px;
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-sm);
+  cursor:pointer;
+  transition:background 100ms var(--ease), border-color 100ms var(--ease);
+}
+.write-toolbar .tb-color:hover{ background:var(--surface-3); border-color:var(--line-3); }
+.write-toolbar .tb-color::-webkit-color-swatch-wrapper{ padding:0; }
+.write-toolbar .tb-color::-webkit-color-swatch{ border:none; border-radius:3px; }
+.write-toolbar .tb-color::-moz-color-swatch{ border:none; border-radius:3px; }
+
+/* Write page: toolbar above, chapter row below, one divider under each */
+.write-wrap > #writeToolbar    { order:1; border-bottom:1px solid var(--line); }
+.write-wrap > #chapterControls { order:2; border-bottom:1px solid var(--line); }
+.write-wrap > #writeCanvas     { order:3; flex:1; min-height:0; }
+
+/* ═══ Toolbar: one row, all tools, compact spacing ═══ */
+:is(.tb,.write-toolbar){
+  height:var(--toolbar-h,40px);
+  flex-wrap:nowrap;                 /* never grows to a second row */
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+}
+:is(.tb,.write-toolbar)::-webkit-scrollbar{ display:none; }
+
+:is(.tb,.write-toolbar) .tb-group{ padding:0 4px; gap:2px; }
+:is(.tb,.write-toolbar) .tb-btn{ width:24px; height:24px; font-size:13px; }
+:is(.tb,.write-toolbar) .tb-input[type="number"]{ width:40px; height:24px; }
+:is(.tb,.write-toolbar) .tb-color{ width:24px; height:24px; padding:2px; }
+
+:is(.tb,.write-toolbar) .tb-drop-title,
+:is(.tb,.write-toolbar) .tb-drop2-title{ min-width:104px; padding:4px 8px; font-size:12px; }
+
+/* Narrow windows: let it wrap rather than hide tools off-screen */
+@media (max-width:1200px){
+  :is(.tb,.write-toolbar){ flex-wrap:wrap; height:auto; min-height:var(--toolbar-h,40px); overflow:visible; }
+}
+/* ═══ Toolbar: full-size buttons, still one row ═══ */
+:is(.tb,.write-toolbar) .tb-btn{ width:28px; height:28px; font-size:14.5px; }
+:is(.tb,.write-toolbar) .tb-group{ padding:0 8px; gap:4px; }
+
+:is(.tb,.write-toolbar) .tb-input[type="number"]{ width:44px; height:28px; font-size:12.5px; }
+:is(.tb,.write-toolbar) .tb-color{ width:28px; height:28px; padding:3px; }
+
+:is(.tb,.write-toolbar) .tb-drop-title,
+:is(.tb,.write-toolbar) .tb-drop2-title{ min-width:118px; padding:5px 9px; font-size:12.5px; }
+
+/* ═══ Find bar: below the chapter row, above the text ═══ */
+.write-wrap > #findBar{ order:2; }
+
+/* ═══ ONE THEME — box = surface-2 + line-2 hairline + r-md ═══ */
+.stat-card-lg, .stat-mini,
+.set-card, .stats-body > .set-card{
+  background:var(--surface-2) !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-md) !important;
+}
+.btn.btn-ghost{
+  background:transparent !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-md) !important;
+  color:var(--ink-2) !important;
+}
+.btn.btn-ghost:hover{
+  background:var(--surface-2) !important;
+  border-color:var(--line-3) !important;
+  color:var(--ink) !important;
+}
+.fab-menu, .fab-ai, .ai-panel, .music-player, .music-mini{
+  background:var(--surface-1) !important;
+  border:1px solid var(--line-2) !important;
+  box-shadow:var(--e-3) !important;
+}
+
+/* ═══ Dashboard tiles — styles are injected by pages.js at runtime ═══ */
+.home-tile-big{
+  background:var(--surface-2) !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-lg) !important;
+}
+.home-tile-big:hover{
+  background:var(--surface-3) !important;
+  border-color:var(--line-3) !important;
+}
+
+/* ═══ FAB right-click AI menu → match the left-click menu ═══ */
+.fab-ai-head{
+  padding:6px 10px 4px;
+  border-bottom:none;
+  font-size:9.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-4);
+}
+.fab-ai-head i{font-size:12px;}
+.fab-ai-head span{text-transform:uppercase;}
+.fab-ai-body{padding:0 4px 4px;gap:2px;}
+.fab-ai .ai-chip{
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--ink-2);
+  padding:8px 10px;
+  font-size:12.5px;
+}
+.fab-ai .ai-chip:hover{background:var(--overlay);border-color:transparent;color:var(--ink);}
+.fab-ai .ai-chip.primary{background:var(--accent);color:var(--accent-ink);}
+.fab-ai .ai-chip.primary:hover{background:var(--accent);opacity:.9;}
+.fab-ai .ai-select,
+.fab-ai .ai-input{
+  height:30px;padding:0 8px;
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  background:var(--surface-2);
+  font-size:12px;box-sizing:border-box;
+}
+.fab-ai .ai-select:hover,.fab-ai .ai-input:hover{border-color:var(--line-3);}
+.fab-ai .ai-label{margin:6px 0 2px;padding:0 2px;font-size:9.5px;}
+
+/* ═══ Find bar: sits under the chapter row instead of above the toolbar ═══ */
+.write-wrap > #findBar{ order:2; }
+/* Chapter row: line its first box up with the toolbar's first box */
+.chapter-controls{ padding-left:24px; }   /* 16px row padding + 8px the toolbar group adds */
+/* ═══ 1. Flat icon buttons — no fill, no outline (like Find / Export) ═══ */
+:is(.tb,.write-toolbar) .tb-btn{
+  background:transparent !important;
+  border:1px solid transparent !important;
+  box-shadow:none !important;
+  color:var(--ink-3);
+}
+:is(.tb,.write-toolbar) .tb-btn:hover{
+  background:var(--overlay) !important;
+  color:var(--ink);
+}
+
+/* the same flat look for icon buttons elsewhere in the app */
+.icon-btn, .icon-btn-sm{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+}
+
+/* ═══ 2. Icon library button — nudge it further right ═══ */
+:is(.tb,.write-toolbar) > .tb-group:last-child{ padding-right:0; }   /* −8px */                        /* optional: −8px more */
+
+/* ═══ FAB right-click AI menu → match the left-click menu ═══ */
+.fab-ai{border-radius:var(--r-lg);}
+
+/* header: flat label, like .fab-menu-head */
+.fab-ai-head{
+  padding:6px 10px 4px;
+  border-bottom:none;
+  font-size:9.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-4);
+}
+.fab-ai-head i{font-size:12px;}
+.fab-ai-head span{text-transform:uppercase;}
+
+/* body: same rhythm as .fab-menu-body */
+.fab-ai-body{padding:0 4px 4px;gap:2px;}
+
+/* chips → flat rows, like .fab-item */
+.fab-ai .ai-chip{
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--ink-2);
+  padding:8px 10px;
+  font-size:12.5px;
+}
+.fab-ai .ai-chip:hover{background:var(--overlay);border-color:transparent;color:var(--ink);}
+/* keep the main action solid black, like the FAB itself */
+.fab-ai .ai-chip.primary{background:var(--accent);color:var(--accent-ink);}
+.fab-ai .ai-chip.primary:hover{background:var(--accent);opacity:.9;}
+
+/* selects + input → same box as the toolbar dropdowns */
+.fab-ai .ai-select,
+.fab-ai .ai-input{
+  height:30px;padding:0 8px;
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  background:var(--surface-2);
+  font-size:12px;box-sizing:border-box;
+}
+.fab-ai .ai-select:hover,.fab-ai .ai-input:hover{border-color:var(--line-3);}
+.fab-ai .ai-label{margin:6px 0 2px;padding:0 2px;font-size:9.5px;}
+
+/* ═══════════════════════════════════════════════════════════
+   ONE THEME — box = surface-2 fill + line-2 hairline + r-md
+   (matches the write toolbar dropdowns)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Stats cards + settings cards */
+.stat-card-lg, .stat-mini, .set-card,
+.stats-body > .set-card,
+.stats-body > .set-card.stats-chart-card{
+  background:var(--surface-2) !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-md) !important;
+}
+
+/* Dashboard tiles — styled inline in pages.js, so !important is required */
+.home-tile-big{
+  background:var(--surface-2) !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-lg) !important;
+}
+.home-tile-big:hover{
+  background:var(--surface-3) !important;
+  border-color:var(--line-3) !important;
+}
+
+/* Text buttons — same hairline as the boxes */
+.btn.btn-ghost{
+  background:transparent !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-md) !important;
+  color:var(--ink-2) !important;
+}
+.btn.btn-ghost:hover{
+  background:var(--surface-2) !important;
+  border-color:var(--line-3) !important;
+  color:var(--ink) !important;
+}
+
+/* Popups — one hairline, one soft shadow, no heavy e-4 */
+.fab-menu, .fab-ai, .ai-panel, .music-player, .music-mini{
+  background:var(--surface-1) !important;
+  border:1px solid var(--line-2) !important;
+  box-shadow:var(--e-3) !important;
+}
+/* ═══════════════════════════════════════════════════════════
+   FLAT SURFACES — no fill, no outline (like the toolbar icons)
+   `body` prefix + .stats-body match the !important rules already
+   in this file, so these actually win.
+   ═══════════════════════════════════════════════════════════ */
+body .home-tile-big, body .stat-card-lg, body .stat-mini,
+body .set-card, body .stats-body .set-card,
+body .draft-card, body .tile, body .page-tile, body .proj-item-wrap,
+body .col, body .beat, body .time-card, body .cast-card, body .ref-card,
+body .cat-stats{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+}
+
+/* hover reveals the box */
+body .home-tile-big:hover, body .draft-card:hover, body .tile:hover,
+body .page-tile:hover, body .proj-item-wrap:hover{
+  background:var(--overlay-strong) !important;
+}
+
+/* selected states stay visible */
+body .tile.on, body .page-tile.active, body .fab-item.active{
+  background:var(--overlay-strong) !important;
+}
+
+/* floating popups / modals stay opaque — content passes behind them */
+.modal, .pages-panel, .modes-panel, .info-panel, .github-panel,
+.ai-panel, .music-player, .music-mini, .fab-menu, .fab-ai{
+  background:var(--surface-1) !important;
+  border:1px solid var(--line-2) !important;
+  box-shadow:var(--e-3) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TINTED SKIN — no outlines, no grey; theme colour instead
+   ═══════════════════════════════════════════════════════════ */
+body .home-tile-big, body .stat-card-lg, body .stat-mini,
+body .set-card, body .stats-body .set-card, body .stats-chart-card,
+body .draft-card, body .tile, body .page-tile, body .proj-item-wrap,
+body .col, body .beat, body .time-card, body .cast-card, body .ref-card,
+body .cat-stats, body .tb-drop-title, body .tb-drop2-title,
+body .stats-cat-title, body .tb-input, body .tb-color,
+body .chip, body .mode-pill, body .btn:not(.btn-primary), body .floating-import{
+  background:var(--tint) !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+}
+
+/* hover / active — just a stronger tint, still no outline */
+body .home-tile-big:hover, body .tile:hover, body .page-tile:hover,
+body .draft-card:hover, body .proj-item-wrap:hover,
+body .tb-drop-title:hover, body .tb-drop2-title:hover,
+body .stats-cat-title:hover, body .chip:hover, body .mode-pill:hover,
+body .btn:not(.btn-primary):hover{
+  background:var(--tint-2) !important;
+}
+body .mode-pill.active, body .chip.active, body .tile.on,
+body .page-tile.active, body .fab-item.active, body .stats-cat-item.active{
+  background:var(--tint-3) !important;
+  border-color:transparent !important;
+}
+
+/* icons carry the theme colour */
+body .tb-btn i, body .icon-btn i, body .icon-btn-sm i,
+body .fab-item i, body .stats-cat-title i, body .set-card-title i,
+body .page-tile i, body .home-tile-big i, body .draft-card i,
+body .stat-ico, body .info-stat i, body .btn:not(.btn-primary) i{
+  color:var(--tintc) !important;
+}
+body .tb-btn:hover i, body .icon-btn:hover i, body .icon-btn-sm:hover i,
+body .btn:not(.btn-primary):hover i{ color:var(--ink) !important; }
+/* primary stays black-on-white — never tint it */
+body .btn-primary, body .btn-primary i{ color:var(--accent-ink) !important; background:var(--accent) !important; }
+
+/* modals & floating panels stay opaque so text behind never shows through */
+body .modal, body .pages-panel, body .modes-panel, body .info-panel,
+body .github-panel, body .ai-panel, body .music-player, body .music-mini,
+body .fab-menu, body .fab-ai, body .stats-cat-list{
+  background:var(--surface-1) !important;
+  border-color:transparent !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROFESSIONAL OUTLINE SKIN
+   Same treatment as the music/video players:
+   no fill · 1px hairline · 6px radius · one solid primary
+   ═══════════════════════════════════════════════════════════ */
+
+/* cards & tiles — subtle hairline, like the player's panel edges */
+body .home-tile-big, body .stat-card-lg, body .stat-mini,
+body .set-card, body .stats-body .set-card, body .stats-chart-card,
+body .draft-card, body .tile, body .page-tile, body .proj-item-wrap,
+body .col, body .beat, body .time-card, body .cast-card, body .ref-card,
+body .cat-stats{
+  background:transparent !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-md) !important;
+  box-shadow:none !important;
+}
+
+/* controls — slightly stronger hairline so they read as clickable */
+body .tb-drop-title, body .tb-drop2-title, body .tb-input, body .tb-select,
+body .tb-color, body .stats-cat-title, body .chip, body .mode-pill,
+body .btn:not(.btn-primary), body .floating-import{
+  background:transparent !important;
+  border:1px solid var(--line-3) !important;
+  box-shadow:none !important;
+}
+
+/* hover */
+body .home-tile-big:hover, body .tile:hover, body .page-tile:hover,
+body .draft-card:hover, body .proj-item-wrap:hover,
+body .tb-drop-title:hover, body .tb-drop2-title:hover, body .stats-cat-title:hover,
+body .chip:hover, body .mode-pill:hover, body .btn:not(.btn-primary):hover{
+  background:var(--overlay) !important;
+}
+
+/* active / selected */
+body .mode-pill.active, body .chip.active, body .tile.on,
+body .page-tile.active, body .fab-item.active, body .stats-cat-item.active{
+  background:var(--overlay-strong) !important;
+  color:var(--ink) !important;
+  box-shadow:none !important;
+}
+
+/* icons — neutral, exactly like the player's transport icons */
+body .tb-btn i, body .icon-btn i, body .icon-btn-sm i, body .fab-item i,
+body .stats-cat-title i, body .set-card-title i, body .stat-ico,
+body .page-tile i, body .home-tile-big i{ color:var(--ink-2) !important; }
+body .tb-btn:hover i, body .icon-btn:hover i, body .icon-btn-sm:hover i{ color:var(--ink) !important; }
+
+/* popups & floating panels — opaque surface + hairline + one soft shadow */
+body .modal, body .pages-panel, body .modes-panel, body .info-panel,
+body .github-panel, body .ai-panel, body .music-player, body .music-mini,
+body .fab-menu, body .fab-ai, body .stats-cat-list,
+body .tb-drop-list, body .tb-drop2-list{
+  background:var(--surface-1) !important;
+  border:1px solid var(--line-2) !important;
+  box-shadow:var(--e-3) !important;
+}
+
+/* the single solid element — the play button of this app */
+body .btn-primary{
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+  color:var(--accent-ink) !important;
+}
+/* ═══════════════════════════════════════════════════════════
+   FINISH THE OUTLINE SKIN — no fills anywhere
+   (the only solid element left is .btn-primary / .cat-new-btn)
+   ═══════════════════════════════════════════════════════════ */
+body .page-tile, body .page-tile.active,
+body .tile, body .tile.on,
+body .proj-item-wrap, body .proj-row, body .proj-row.active{
+  background:transparent !important;
+  box-shadow:none !important;
+}
+
+/* small icon squares & list rows — hairline instead of a grey block */
+body .proj-icon, body .cast-avatar, body .ref-icon,
+body .col-count, body .beat-type, body .stat-mini,
+body .stats-cat-item{
+  background:transparent !important;
+  border:1px solid var(--line-2) !important;
+  box-shadow:none !important;
+}
+
+/* selected = a brighter hairline, nothing more */
+body .page-tile.active, body .tile.on, body .stats-cat-item.active{
+  border-color:var(--ink-3) !important;
+  background:transparent !important;
+}
+
+/* hover stays neutral grey — no colour, no glow */
+body .page-tile:hover, body .tile:hover, body .proj-row:hover,
+body .home-tile-big:hover, body .draft-card:hover{
+  background:var(--overlay) !important;
+  border-color:var(--line-3) !important;
+}
+
+/* icons inside those squares stay neutral like the player transport icons */
+body .proj-icon, body .cast-avatar, body .ref-icon,
+body .col-count, body .beat-type{ color:var(--ink-2) !important; }
+/* ═══════════════════════════════════════════════════════════
+   PROFESSIONAL OUTLINE SKIN — night mode
+   Reference: the music / video player control bar
+   1px hairline · no fill · 6px radius · one solid primary
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1. Cards, tiles, list rows — hairline, never a grey block ── */
+body .home-tile-big, body .stat-card-lg, body .stat-mini,
+body .set-card, body .stats-body .set-card, body .stats-chart-card,
+body .draft-card, body .tile, body .page-tile, body .proj-item-wrap,
+body .proj-row, body .col, body .beat, body .time-card,
+body .cast-card, body .ref-card, body .cat-stats{
+  background:transparent !important;
+  border:1px solid var(--line-2) !important;
+  border-radius:var(--r-md) !important;
+  box-shadow:none !important;
+}
+
+/* ── 2. Dropdowns, inputs, pills, buttons — same hairline, no fill ── */
+body .tb-drop-title, body .tb-drop2-title, body .tb-input, body .tb-select,
+body .tb-color, body .stats-cat-title, body .stats-cat-item,
+body .chip, body .mode-pill, body .btn:not(.btn-primary),
+body .floating-import{
+  background:transparent !important;
+  border:1px solid var(--line-3) !important;
+  box-shadow:none !important;
+}
+
+/* ── 3. Small icon squares — outline instead of a filled chip ── */
+body .proj-icon, body .cast-avatar, body .ref-icon,
+body .col-count, body .beat-type{
+  background:transparent !important;
+  border:1px solid var(--line-2) !important;
+  box-shadow:none !important;
+}
+
+/* ── 4. Hover — brighter hairline + a whisper of light, no colour ── */
+body .home-tile-big:hover, body .tile:hover, body .page-tile:hover,
+body .draft-card:hover, body .proj-item-wrap:hover,
+body .tb-drop-title:hover, body .tb-drop2-title:hover,
+body .stats-cat-title:hover, body .chip:hover, body .mode-pill:hover,
+body .btn:not(.btn-primary):hover, body .stats-cat-item:hover{
+  background:var(--overlay) !important;
+  border-color:var(--line-3) !important;
+  box-shadow:none !important;
+}
+
+/* ── 5. Selected — a brighter hairline and nothing else ── */
+body .mode-pill.active, body .chip.active, body .tile.on,
+body .page-tile.active, body .stats-cat-item.active{
+  background:transparent !important;
+  border-color:var(--ink-3) !important;
+  color:var(--ink) !important;
+  box-shadow:none !important;
+}
+
+/* ── 6. Icons stay neutral, exactly like the player transport icons ── */
+body .tb-btn i, body .icon-btn i, body .icon-btn-sm i, body .fab-item i,
+body .stats-cat-title i, body .set-card-title i, body .stat-ico,
+body .page-tile i, body .home-tile-big i, body .proj-icon,
+body .cast-avatar, body .ref-icon{ color:var(--ink-2) !important; }
+body .tb-btn:hover i, body .icon-btn:hover i, body .icon-btn-sm:hover i{ color:var(--ink) !important; }
+
+/* ── 7. Popups & floating panels — opaque, one hairline, one soft shadow ── */
+body .modal, body .pages-panel, body .modes-panel, body .info-panel,
+body .github-panel, body .ai-panel, body .music-player, body .music-mini,
+body .fab-menu, body .fab-ai, body .stats-cat-list,
+body .tb-drop-list, body .tb-drop2-list{
+  background:var(--surface-1) !important;
+  border:1px solid var(--line-2) !important;
+  box-shadow:var(--e-3) !important;
+}
+
+/* ── 8. The single solid control in the whole app ── */
+body .btn-primary{
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+  color:var(--accent-ink) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILLED SKIN — no outlines, surfaces carry the separation
+   night: page #1b1a19 → box #292725 → nested/hover #312e2c
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1. Cards, tiles, list rows ── */
+body .home-tile-big, body .stat-card-lg, body .stat-mini,
+body .set-card, body .stats-body > .set-card, body .stats-chart-card,
+body .draft-card, body .tile, body .page-tile, body .proj-item-wrap,
+body .proj-row, body .col, body .beat, body .time-card,
+body .cast-card, body .ref-card, body .cat-stats{
+  background:var(--surface-2) !important;
+  border-color:transparent !important;
+  border-radius:var(--r-md) !important;
+  box-shadow:none !important;
+}
+
+/* ── 2. Boxes that sit INSIDE a modal/panel get one step lighter ── */
+body .modal .page-tile, body .modal .cat-stats, body .modal .set-card,
+body .modal .proj-item-wrap, body .modal .tile, body .modal .draft-card,
+body .pages-panel .page-tile, body .info-panel .set-card{
+  background:var(--surface-3) !important;
+}
+
+/* ── 3. Dropdowns, inputs, pills, buttons — filled, no border ── */
+body .tb-drop-title, body .tb-drop2-title, body .tb-input, body .tb-select,
+body .tb-color, body .stats-cat-title, body .stats-cat-item,
+body .chip, body .mode-pill, body .btn:not(.btn-primary),
+body .floating-import{
+  background:var(--surface-2) !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+}
+
+/* ── 4. Small icon squares ── */
+body .proj-icon, body .cast-avatar, body .ref-icon,
+body .col-count, body .beat-type{
+  background:var(--surface-3) !important;
+  border-color:transparent !important;
+}
+
+/* ── 5. Hover — one step lighter, still no outline ── */
+body .home-tile-big:hover, body .tile:hover, body .page-tile:hover,
+body .draft-card:hover, body .proj-item-wrap:hover,
+body .tb-drop-title:hover, body .tb-drop2-title:hover,
+body .stats-cat-title:hover, body .chip:hover, body .mode-pill:hover,
+body .btn:not(.btn-primary):hover, body .stats-cat-item:hover{
+  background:var(--surface-3) !important;
+  border-color:transparent !important;
+}
+
+/* ── 6. Selected — brighter fill + ink text ── */
+body .mode-pill.active, body .chip.active, body .tile.on,
+body .page-tile.active, body .stats-cat-item.active{
+  background:var(--surface-4) !important;
+  border-color:transparent !important;
+  color:var(--ink) !important;
+}
+
+/* ── 7. Popups, panels, modals — the raised surface ── */
+body .modal, body .pages-panel, body .modes-panel, body .info-panel,
+body .github-panel, body .ai-panel, body .music-player, body .music-mini,
+body .fab-menu, body .fab-ai, body .stats-cat-list,
+body .tb-drop-list, body .tb-drop2-list{
+  background:var(--surface-2) !important;
+  border-color:transparent !important;
+  box-shadow:var(--e-3) !important;
+}
+
+/* ── 8. Icons stay neutral ── */
+body .tb-btn i, body .icon-btn i, body .icon-btn-sm i, body .fab-item i,
+body .stats-cat-title i, body .set-card-title i, body .stat-ico,
+body .page-tile i, body .home-tile-big i{ color:var(--ink-2) !important; }
+body .tb-btn:hover i, body .icon-btn:hover i, body .icon-btn-sm:hover i{ color:var(--ink) !important; }
+
+/* ── 9. The one solid control ── */
+body .btn-primary{
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+  color:var(--accent-ink) !important;
+}
+
+/* ── 10. Make sure the write page joins night mode too ── */
+body .write-wrap, body .write-canvas{ background:var(--doc-bg) !important; }
+/* ═══════════════════════════════════════════════════════════
+   CATCH-UP SKIN — fills everywhere, outlines physically off
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── A. Controls: kill the border, not just its colour ── */
+body .tb-drop-title, body .tb-drop2-title, body .tb-input, body .tb-select,
+body .tb-color, body .stats-cat-title, body .stats-cat-item,
+body .chip, body .mode-pill, body .btn:not(.btn-primary),
+body .floating-import, body .icon-btn-sm, body .chapter-control .icon-btn-sm,
+body .set-tab{
+  background:var(--surface-2) !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+body .tb-drop-title:hover, body .tb-drop2-title:hover,
+body .stats-cat-title:hover, body .chip:hover,
+body .mode-pill:hover, body .btn:not(.btn-primary):hover{
+  background:var(--surface-3) !important;
+}
+body .mode-pill.active, body .chip.active, body .stats-cat-item.active{
+  background:var(--surface-4) !important;
+  color:var(--ink) !important;
+}
+
+/* ── B. Toolbar icon buttons get a fill too (delete this block
+        if you'd rather keep them flat) ── */
+body .tb-btn{
+  background:var(--surface-2) !important;
+  border:0 !important;
+}
+body .tb-btn:hover{ background:var(--surface-3) !important; }
+body .tb-btn.active{ background:var(--surface-4) !important; }
+
+/* ── C. Settings toggles ── */
+body .tgl{ background:var(--surface-4) !important; border:0 !important; }
+body .tgl.on{ background:var(--accent) !important; }
+body .tgl::after{ background:var(--ink-3) !important; }
+body .tgl.on::after{ background:var(--bg) !important; }
+
+/* ── D. Music + video players: override the hardcoded whites ──
+        (extra `body #id` specificity so it beats their !important) */
+body #vpFloatBar{ background:var(--surface-2) !important; border:0 !important; }
+body #vpFloatBar .mv-btn,
+body #musicPanel .mv-controls .mv-btn,
+body .music-body .mv-controls .mv-btn{
+  background:var(--surface-3) !important;
+  border:0 !important;
+  color:var(--ink-2) !important;
+}
+body #vpFloatBar .mv-btn:hover,
+body #musicPanel .mv-controls .mv-btn:hover{
+  background:var(--surface-4) !important; color:var(--ink) !important;
+}
+body #vpFloatBar .mv-play,
+body #musicPanel .mv-play,
+body .music-body .mv-play{
+  background:var(--accent) !important;
+  border:0 !important;
+}
+body #vpFloatBar .mv-play:hover,
+body #musicPanel .mv-play:hover{ background:var(--accent-2) !important; }
+body #vpFloatBar .mv-play i,
+body #musicPanel .mv-play i,
+body .music-body .mv-play i{ color:var(--accent-ink) !important; }
+
+body #vpFloatBar .vp-group-seek{ background:var(--surface-3) !important; border:0 !important; }
+body #vpFloatBar .vp-divider{ background:var(--line) !important; }
+body #vpFloatBar .vp-time, body #vpFloatBar .vp-vol-pct,
+body #vpFloatBar .vp-aspect-pct{ color:var(--ink-3) !important; }
+
+body #vpFloatBar .vp-group-seek input[type="range"],
+body #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-runnable-track,
+body .mv-seek input[type="range"],
+body .mv-seek input[type="range"]::-webkit-slider-runnable-track,
+body .mv-volume input[type="range"],
+body .mv-volume input[type="range"]::-webkit-slider-runnable-track{
+  background:var(--surface-4) !important;
+}
+body #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-thumb,
+body .mv-seek input[type="range"]::-webkit-slider-thumb,
+body .mv-volume input[type="range"]::-webkit-slider-thumb{
+  background:var(--accent) !important;
+}
+body .mv-visualizer{ background:var(--surface-3) !important; border:0 !important; }
+body .mv-playlist-head, body .mv-item{ border-color:var(--line) !important; }
+body #videoStage{ background:#000 !important; }   /* the video frame stays black */
+/* ═══════════════════════════════════════════════════════════
+   FINAL SKIN — filled surfaces, no outlines, night mode
+   html body prefix = highest specificity, beats everything
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1. Frames: topbar buttons, stats dropdowns, controls ── */
+html body .topbar-btn,
+html body .btn.btn-ghost,
+html body .btn:not(.btn-primary),
+html body .chip, html body .mode-pill,
+html body .stats-cat-card, html body .stats-cat-title, html body .stats-cat-item,
+html body .floating-import, html body .tb-drop-title, html body .tb-drop2-title,
+html body .tb-input, html body .tb-color, html body .tb-select,
+html body .tb-btn{
+  background:var(--surface-2) !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+html body .stats-cat-list{
+  background:var(--surface-2) !important;
+  border:0 !important;
+  box-shadow:var(--e-3) !important;
+}
+
+/* ── 2. Hover / selected ── */
+html body .topbar-btn:hover, html body .btn.btn-ghost:hover,
+html body .btn:not(.btn-primary):hover, html body .chip:hover,
+html body .mode-pill:hover, html body .tb-drop-title:hover,
+html body .tb-drop2-title:hover, html body .stats-cat-title:hover,
+html body .stats-cat-item:hover, html body .tb-btn:hover{
+  background:var(--surface-3) !important;
+}
+html body .mode-pill.active, html body .chip.active,
+html body .stats-cat-item.active, html body .tb-btn.active{
+  background:var(--surface-4) !important;
+  color:var(--ink) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SETTINGS MODAL — frame, spacing, tabs, toggles
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1. Frame: same fill + hairline + 6px radius as every card ── */
+html body .modal-scrim .modal{
+  background:var(--surface-2) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--r-md,6px) !important;
+  box-shadow:var(--e-4) !important;
+  overflow:hidden !important;
+}
+html body .modal-scrim .modal-head{
+  background:transparent !important;
+  border-bottom:1px solid var(--line) !important;
+  padding:14px 18px !important;
+  display:flex !important; align-items:center !important; justify-content:space-between !important;
+}
+html body .modal-scrim .modal-head h2{
+  display:flex !important; align-items:center !important; gap:9px !important;
+  font-size:14px !important; font-weight:600 !important; letter-spacing:-.01em !important;
+}
+html body .modal-scrim .modal-head i{ font-size:16px !important; color:var(--ink-2) !important; }
+html body .modal-scrim .modal-foot{
+  background:transparent !important;
+  border-top:1px solid var(--line) !important;
+  padding:12px 18px !important;
+  display:flex !important; align-items:center !important; justify-content:flex-end !important; gap:8px !important;
+}
+
+/* ── 2. Tab bar — the underline belongs INSIDE the tab ── */
+html body #setTabs{
+  display:flex !important; gap:2px !important;
+  padding:0 12px !important;
+  border-bottom:1px solid var(--line) !important;
+  overflow-x:auto !important;
+}
+html body #setTabs .set-tab{
+  padding:12px 14px !important;
+  margin:0 0 -1px 0 !important;
+  background:transparent !important;
+  border:0 !important;
+  border-bottom:2px solid transparent !important;
+  border-radius:0 !important;
+  color:var(--ink-3) !important;
+  font-size:12.5px !important;
+  display:flex !important; align-items:center !important; gap:7px !important;
+  white-space:nowrap !important;
+}
+html body #setTabs .set-tab:hover{ color:var(--ink) !important; background:transparent !important; }
+html body #setTabs .set-tab.active{
+  color:var(--ink) !important;
+  border-bottom-color:var(--ink) !important;
+  font-weight:500 !important;
+}
+html body #setTabs .set-tab i{ color:inherit !important; font-size:13px !important; }
+
+/* ── 3. Body, cards and rows — comfortable, nothing stacked ── */
+html body #setBody{
+  padding:18px !important;
+  display:block !important;
+  overflow-y:auto !important;
+}
+html body #setBody .set-card{
+  background:var(--surface-3) !important;
+  border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+  padding:14px 16px !important;
+  margin:0 0 14px 0 !important;      /* ← the gap between sections */
+  display:flex !important;
+  flex-direction:column !important;
+  gap:0 !important;
+}
+html body #setBody .set-card:last-child{ margin-bottom:0 !important; }
+html body #setBody .set-card-title{
+  margin:0 0 6px 0 !important;        /* ← gap under "Core" / "Interface" / "Data" */
+  display:flex !important; align-items:center !important; gap:7px !important;
+  font-size:10.5px !important; font-weight:600 !important;
+  text-transform:uppercase !important; letter-spacing:.08em !important;
+  color:var(--ink-4) !important;
+}
+html body #setBody .set-row{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:16px !important;
+  padding:12px 0 !important;          /* ← breathing room per option */
+  border-bottom:1px solid var(--line) !important;
+}
+html body #setBody .set-row:last-child{
+  border-bottom:0 !important;
+  padding-bottom:2px !important;
+}
+html body #setBody .set-label{ font-size:12.5px !important; color:var(--ink) !important; }
+html body #setBody .set-desc{ font-size:11.5px !important; color:var(--ink-3) !important; margin-top:3px !important; }
+html body #setBody .set-ctrl{ display:flex !important; align-items:center !important; gap:8px !important; flex-shrink:0 !important; }
+
+/* ── 4. Toggles — track and knob must both be visible ── */
+html body .tgl{
+  width:40px !important;
+  height:22px !important;
+  padding:0 !important;
+  background:var(--surface-4) !important;
+  border:1px solid var(--line) !important;
+  border-radius:999px !important;
+  position:relative !important;
+  flex-shrink:0 !important;
+  cursor:pointer !important;
+}
+html body .tgl::after{
+  content:'' !important;
+  position:absolute !important;
+  top:2px !important; left:2px !important;
+  width:16px !important; height:16px !important;
+  border-radius:50% !important;
+  background:var(--ink-3) !important;      /* grey knob when off */
+  transform:none !important;
+  transition:transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease) !important;
+}
+html body .tgl.on{
+  background:var(--accent) !important;     /* light track when on */
+  border-color:var(--accent) !important;
+}
+html body .tgl.on::after{
+  transform:translateX(18px) !important;
+  background:var(--bg) !important;         /* dark knob slides right */
+}
+
+
+/* ── 4. Music + video players — override the hardcoded whites ── */
+html body #musicPanel .mv-btn,
+html body #musicPanel .mv-controls .mv-btn,
+html body .music-body .mv-controls .mv-btn,
+html body #musicPanel .mp-vol-btn,
+html body .music-body .mp-vol-btn,
+html body #vpFloatBar .mv-btn{
+  background:var(--surface-3) !important;
+  border:0 !important;
+  color:var(--ink-2) !important;
+}
+html body #musicPanel .mv-btn:hover,
+html body #musicPanel .mp-vol-btn:hover,
+html body #vpFloatBar .mv-btn:hover{
+  background:var(--surface-4) !important;
+  color:var(--ink) !important;
+}
+html body #musicPanel .mv-controls .mv-btn.active{
+  background:var(--surface-4) !important;
+  color:var(--ink) !important;
+}
+html body #musicPanel .mv-play,
+html body #musicPanel .mv-controls .mv-play,
+html body .music-body .mv-play,
+html body #vpFloatBar .mv-play{
+  background:var(--accent) !important;
+  border:0 !important;
+}
+html body #musicPanel .mv-play i,
+html body .music-body .mv-play i,
+html body #vpFloatBar .mv-play i{ color:var(--accent-ink) !important; }
+html body #musicPanel .mv-play:hover,
+html body .music-body .mv-play:hover{ background:var(--accent-2) !important; }
+
+html body #musicPanel .mv-seek,
+html body #vpFloatBar .vp-group-seek{
+  background:var(--surface-3) !important;
+  border:0 !important;
+}
+html body #musicPanel .mv-seek span,
+html body #musicPanel .mp-vol-pct,
+html body #vpFloatBar .vp-time,
+html body #vpFloatBar .vp-vol-pct,
+html body #vpFloatBar .vp-aspect-pct{ color:var(--ink-3) !important; }
+html body #musicPanel .mv-seek input[type="range"],
+html body #musicPanel .mv-seek input[type="range"]::-webkit-slider-runnable-track,
+html body #vpFloatBar .vp-group-seek input[type="range"],
+html body #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-runnable-track{
+  background:var(--surface-4) !important;
+}
+html body #musicPanel .mv-seek input[type="range"]::-webkit-slider-thumb,
+html body #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-thumb{
+  background:var(--accent) !important;
+}
+html body #musicPanel .mv-pager-btn{
+  background:var(--surface-2) !important;
+  border:0 !important;
+  color:var(--ink-2) !important;
+}
+html body #musicPanel .mv-pager-btn:hover{ background:var(--surface-3) !important; }
+html body #musicPanel .mv-visualizer{ background:transparent !important; }
+html body #videoStage{ background:#000 !important; }
+html body #vpFloatBar{ background:var(--surface-2) !important; border:0 !important; }
+html body #vpFloatBar .vp-divider{ background:var(--line) !important; }
+
+/* ── 5. The one solid control ── */
+html body .btn-primary{
+  background:var(--accent) !important;
+  border:0 !important;
+  color:var(--accent-ink) !important;
+}
+/* Stats body cards: match the specificity of pages.css's own
+   `.stats-body .set-card` rule (2 classes) so these actually win */
+html body .stats-body .set-card,
+html body .stats-body > .set-card,
+html body .stats-grid-mid .set-card,
+html body .stats-body .set-card.stats-chart-card,
+html body .stats-body > .set-card.stats-chart-card{
+  background:var(--surface-2) !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+html body .stats-body .set-card-title,
+html body .stats-body > .set-card > .set-card-title{
+  color:var(--ink-4) !important;
+}
+/* the right-hand LOW/AVG/HIGH/TOTAL column */
+html body .stats-body .stat-mini,
+html body .stat-mini{
+  background:var(--surface-3) !important;
+  border:0 !important;
+}
+/* ═══ Stats dropdowns — floating rounded menu, like .tb-drop-list ═══ */
+
+/* trigger box: always fully rounded (fallback 6px in case the token
+   doesn't resolve in this scope — that alone can give square corners) */
+html body .stats-cat-card,
+html body .stats-cat-card .stats-cat-title,
+html body .stats-cat-card.open .stats-cat-title{
+  background:var(--surface-2) !important;
+  border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+}
+/* the button inside stays transparent so we don't fill twice */
+html body .stats-cat-card .stats-cat-title{ background:transparent !important; }
+
+/* the open menu: all four corners, its own shadow, small gap */
+html body .stats-cat-list{
+  background:var(--surface-2) !important;
+  border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+  box-shadow:var(--e-3) !important;
+  margin-top:6px !important;
+  padding:6px !important;
+}
+html body .stats-cat-item{
+  background:transparent !important;
+  border:0 !important;
+  border-radius:var(--r-sm,4px) !important;
+}
+html body .stats-cat-item:hover{ background:var(--surface-3) !important; }
+html body .stats-cat-item.active{ background:var(--surface-4) !important; color:var(--ink) !important; }
+
+/* ═══ Settings modal: drop the "Settings" title and its icon,
+       keep only the ✕ ═══ */
+html body .modal-head:has(+ #setTabs) h2{
+  display:none !important;
+}
+/* keep the close button pinned right and the bar slim */
+html body .modal-head:has(+ #setTabs){
+  justify-content:flex-end !important;
+  padding:10px 14px !important;
+  border-bottom:1px solid var(--line) !important;
+}
+/* ═══ Player-style frame for the Settings + GitHub panels ═══ */
+html body{ --frame-bg: var(--surface-2); }   /* ← ONE dial for all three */
+
+html body .panel-shell,
+html body .github-panel,
+html body .modal-scrim .modal{
+  background:var(--frame-bg) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--r-md,6px) !important;   /* player's radius, not --r-lg */
+  box-shadow:var(--e-4) !important;
+  overflow:hidden !important;
+}
+
+/* heads — same colour as the frame, hairline under, grabbable */
+html body .panel-head,
+html body .github-panel .gh-head,
+html body .modal-scrim .modal-head{
+  background:transparent !important;
+  border-bottom:1px solid var(--line) !important;
+  padding:8px 10px !important;
+  display:flex !important; align-items:center !important; gap:6px !important;
+  flex-shrink:0 !important;
+  cursor:grab !important;
+  user-select:none !important; -webkit-user-select:none !important;
+}
+html body .github-panel .gh-head{ justify-content:space-between !important; }
+html body .modal-scrim .modal-head{ justify-content:flex-end !important; }   /* title is hidden → ✕ stays right */
+html body .panel-head:active,
+html body .github-panel .gh-head:active,
+html body .modal-scrim .modal-head:active{ cursor:grabbing !important; }
+html body .github-panel .gh-head button,
+html body .modal-scrim .modal-head button{ cursor:pointer !important; }
+
+/* the settings tab strip was painting its own darker band */
+html body #setTabs{ background:transparent !important; padding:0 10px !important; }
+
+/* close buttons — the player's .v-close look, everywhere */
+html body .v-close{
+  width:24px !important; height:24px !important; padding:0 !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  background:transparent !important; border:0 !important;
+  border-radius:var(--r-sm,4px) !important;
+  color:var(--ink-3) !important; cursor:pointer !important;
+}
+html body .v-close:hover{ background:var(--overlay) !important; color:var(--ink) !important; }
+html body .modal-scrim .modal-foot{ border-top:1px solid var(--line) !important; }
