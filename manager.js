@@ -5,7 +5,9 @@
    Taps: volume 1% + hold-ramp · prev/next tap = skip, hold = seek ·
    aspect left/right click · fullscreen native + CSS fallback.
    Dashboard players are never moved, driven or written to.
-   Electron: index.html?player=<url>  ·  window.SF_PLAY_EXTERNAL(url)
+   Electron: window.SF_PLAY_EXTERNAL(url)  ·  the OS hands media to the
+   player app (index.html?app=player); this page is the Media Manager app
+   (index.html?app=manager).
    ═══════════════════════════════════════════════════════════════════ */
 (function(){
 'use strict';
@@ -93,6 +95,7 @@ function buildPlayer(){
   host=c; slot.appendChild(c);
   if(type==='video') initVideoClone(); else initAudioClone();
   folderBtn();
+  watchPlayerSlot();
 }
 
 function initVideoClone(){
@@ -156,6 +159,19 @@ function aVol(){
 }
 
 /* ── MY MOTION, inside the manager's audio stage ─────────────────── */
+/* the player card is about half the window — flag it when the docked bar
+   would clip its right end (the aspect ratio + fullscreen buttons) */
+var mgRO=null, MG_NARROW=420;
+function watchPlayerSlot(){
+  var slot=$('mgPlayerSlot'); if(!slot) return;
+  function fit(){ slot.classList.toggle('mg-narrow', slot.clientWidth > 0 && slot.clientWidth < MG_NARROW); }
+  fit();
+  if(typeof ResizeObserver==='function'){
+    if(mgRO){ try{ mgRO.disconnect(); }catch(e){} }
+    mgRO=new ResizeObserver(fit); mgRO.observe(slot);
+  }
+}
+
 var mCanvas=null, mCtx=null, mW=1, mH=1, mRaf=0, mStore={};
 function stopMotion(){ if(mRaf){ cancelAnimationFrame(mRaf); mRaf=0; } mCanvas=null; mCtx=null; }
 function initMotion(){
@@ -289,9 +305,13 @@ function paintLib(){
   if(page>pages-1) page=pages-1;
   if(page<0) page=0;
   var slice=list.slice(page*PER_PAGE, page*PER_PAGE+PER_PAGE);
+  /* head bar — Video/Audio switch on the left, Import on the right;
+     left-click imports audio, right-click imports video (see onCapture) */
     card.innerHTML=
     '<div class="mg-head">'+
       '<button class="mg-type" data-mg-type>'+(type==='video'?'Video':'Audio')+'</button>'+
+      '<button class="mg-import" data-sf-import="1" title="Import files — left-click: audio · right-click: video">'+
+        '<i class="bi bi-box-arrow-in-down"></i><span>Import</span></button>'+
     '</div>'+
 
     '<div class="mg-list" data-mg-unfile="1">'+
@@ -362,7 +382,6 @@ function mgRender(root){
       '<section class="mg-card mg-player" id="mgPlayer"><div class="mg-slot" id="mgPlayerSlot"></div></section>'+
       '<section class="mg-card mg-side" id="mgSide"></section>'+
     '</div>';
-  var imp=$('floatingImport'); if(imp) imp.style.display='none';   /* Import stays on the Dashboard */
   hideStrips();  
     hideRealPanels(); silenceRealMedia();
   buildPlayer(); paintLib(); paintSide();
@@ -475,7 +494,9 @@ function onCapture(e){
   var t=e.target; if(!t||!t.closest) return;
   var el;
 
-  if(t.closest('#floatingImport')){
+  /* Import — the button on the library bar (right of the Video/Audio switch)
+     and the floating one both add files to the library */
+  if(t.closest('#floatingImport') || t.closest('[data-sf-import]')){
     e.preventDefault(); e.stopImmediatePropagation();
     pickFiles(e.type==='contextmenu'?'video':'audio');
     return;
@@ -706,6 +727,17 @@ document.addEventListener('click', function(e){
 }, true);
 
 
+/* a path handed over by the OS becomes a file:// url. Media filenames are
+   full of spaces and brackets, so encode them (and leave real urls alone). */
+function sfFileUrl(p){
+  if(!p) return '';
+  if(/^[a-z][a-z0-9+.-]*:\/\//i.test(p)) return p;
+  var s=String(p).replace(/\\/g,'/');
+  if(/^[a-z]:\//i.test(s)) s='/'+s;
+  else if(s.charAt(0)!=='/') s='/'+s;
+  return 'file://'+encodeURI(s).replace(/#/g,'%23');
+}
+
 /* ── a file handed to us by the OS / VLC: playlist + history + play ── */
 function openMediaExternally(url){
   if(!url) return;
@@ -713,6 +745,7 @@ function openMediaExternally(url){
 
   if(isVideo){
     var name=url.split('/').pop().split('?')[0].replace(/\.[^.]+$/,'');
+    try{ name=decodeURIComponent(name); }catch(e){}
     if(typeof videoPlaylistAdd==='function') videoPlaylistAdd(url, name, 'url');
     var list=S.config.videoPlaylist||[], idx=-1;
     for(var k=0;k<list.length;k++) if(list[k].url===url) idx=k;
@@ -823,19 +856,25 @@ function mountMediaStats(root){
     '</div>';
   var box=root.querySelector('[data-mg-stat-kind]');
   if(box){
-    box.querySelector('.stats-cat-value').textContent=(mgStatKind==='video')?'Video':'Audio';
-    box.querySelectorAll('.stats-cat-item').forEach(function(el){
-      if(window.PAGE_RENDERERS) window.PAGE_RENDERERS.stats=function(root){ mountMediaStats(root); };
-
-      if(t){ box.classList.toggle('open'); return; }
-      var it=e.target.closest('.stats-cat-item'); if(!it) return;
-      mgStatKind=it.dataset.value;
+    function label(){
+      var v=box.querySelector('.stats-cat-value');
+      if(v) v.textContent=(mgStatKind==='video')?'Video':'Audio';
       box.querySelectorAll('.stats-cat-item').forEach(function(el){
         el.classList.toggle('active', el.dataset.value===mgStatKind);
       });
-      box.querySelector('.stats-cat-value').textContent=(mgStatKind==='video')?'Video':'Audio';
-      box.classList.remove('open');
-      mgStatPaint();
+    }
+    label();
+
+    /* the Video / Audio switch */
+    box.addEventListener('click', function(e){
+      var it=e.target.closest('.stats-cat-item');
+      if(it){
+        mgStatKind=it.dataset.value;
+        box.classList.remove('open');
+        label(); mgStatPaint();
+        return;
+      }
+      if(e.target.closest('.stats-cat-title')) box.classList.toggle('open');
     });
   }
   mgStatPaint();
@@ -843,10 +882,10 @@ function mountMediaStats(root){
 
 
 /* ── boot ────────────────────────────────────────────────────────── */
-if(window.PAGE_RENDERERS) window.PAGE_RENDERERS.overview=function(root){ mgRender(root); };
-var origStatsRender=(window.PAGE_RENDERERS && window.PAGE_RENDERERS.stats) || null;
-if(origStatsRender){
-  window.PAGE_RENDERERS.stats=function(root){ origStatsRender(root); mountMediaStats(root); };
+if(window.PAGE_RENDERERS){
+  window.PAGE_RENDERERS.overview=function(root){ mgRender(root); };
+  /* the app's Statistics page is the media library's own numbers */
+  window.PAGE_RENDERERS.stats=function(root){ mountMediaStats(root); };
 }
 
 var origGoPage=window.goPage;
@@ -862,8 +901,7 @@ window.addEventListener('load', function(){
   /* Electron file association / "Open with" */
   if(window.electronAPI && typeof window.electronAPI.onOpenMedia==='function'){
     window.electronAPI.onOpenMedia(function(p){
-      var url=/^[a-z]+:\/\//i.test(p) ? p : 'file://'+String(p).replace(/\\/g,'/');
-      openMediaExternally(url);
+      openMediaExternally(sfFileUrl(p));
     });
   }
 });

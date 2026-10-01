@@ -1,0 +1,31 @@
+# ScriptForge Player — the app the operating system hands media files to.
+#   npm run dist:player
+#
+# sfApp pins the packaged app to the player window (main.js reads it), so
+# launching it without a file still opens the player, and every audio/video
+# file listed under fileAssociations opens in it.
+appId: com.scriptforge.player
+productName: ScriptForge Player
+directories:
+  output: dist/player
+files:
+  - "**/*"
+  - "!dist/**"
+  - "!electron-builder.*.yml"
+  - "!server.js"
+extraMetadata:
+  sfApp: player
+win:
+  target: nsis
+mac:
+  category: public.app-category.video
+linux:
+  target: AppImage
+  category: AudioVideo
+fileAssociations:
+  - ext: [mp4, webm, mkv, mov, m4v, avi]
+    name: Video file
+    role: Viewer
+  - ext: [mp3, m4a, wav, flac, ogg, oga, opus, aac]
+    name: Audio file
+    role: Viewer

@@ -21,6 +21,16 @@
   border-radius:var(--r-sm);padding:5px 12px;cursor:pointer;}
 .mg-type:hover{background:var(--overlay);}
 
+/* Import — right end of the Video/Audio bar, same button dress */
+.mg-import{margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;font:inherit;font-size:12.5px;font-weight:500;
+  background:transparent;border:1px solid var(--line-2);
+  border-radius:var(--r-sm);color:var(--ink-2);cursor:pointer;
+  transition:all var(--t-fast) var(--ease);}
+.mg-import:hover{background:var(--overlay);border-color:var(--line-3);color:var(--ink);}
+.mg-import i{font-size:13px;}
+@media (max-width:700px){ .mg-import span{display:none;} .mg-import{padding:5px 9px;} }
+
 .mg-list{flex:1 1 auto;min-height:0;overflow-y:auto;padding:6px;}
 .mg-row{display:flex;align-items:center;gap:6px;padding:6px 8px;
   border-radius:var(--r-sm);}
@@ -56,6 +66,125 @@
 .mg-card .vpl-range{font-size:11px;color:var(--ink-3);
   font-variant-numeric:tabular-nums;}
 
+/* ── the embedded control bar must ALWAYS fit the card ────
+   The video bar wants more than 500px at full weight, but the player card
+   is only about half the window — so its right end (the aspect ratio +
+   fullscreen buttons, just right of the volume icon) used to fall off the
+   edge and get clipped. Inside the manager's player copy the bar is
+   therefore always compact: the volume % steps aside, buttons drop to
+   32px, and the seek row keeps exactly the same anatomy as the music
+   player's — 0:00 · 4px track · 0:00 inside a filled capsule with a round
+   accent thumb. Both bars get the identical treatment, so the video seek
+   bar and the audio seek bar stay twins. */
+html body #mgPlayerSlot #videoPanel .mv-btn,
+html body #mgPlayerSlot #musicPanel .mv-btn{
+  width:32px !important; height:32px !important; flex:0 0 auto !important;}
+html body #mgPlayerSlot #videoPanel .mv-play,
+html body #mgPlayerSlot #musicPanel .mv-play{
+  width:38px !important; height:32px !important;}
+html body #mgPlayerSlot #videoPanel .vp-divider,
+html body #mgPlayerSlot #musicPanel .vp-divider{height:16px !important;}
+html body #mgPlayerSlot #videoPanel .vp-vol-pct,
+html body #mgPlayerSlot #musicPanel .mp-vol-pct{display:none !important;}
+
+/* video bar */
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar{ padding:4px 6px !important; }
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group{
+  padding:0 3px !important; gap:1px !important;}
+
+/* ── the seek row: 0:00 · track · 0:00, exactly like #musicPanel .mv-seek ── */
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group.vp-group-seek{
+  flex:1 1 auto !important; min-width:0 !important;
+  display:flex !important; align-items:center !important; height:auto !important;
+  gap:10px !important;
+  background:var(--surface-3) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important;
+  padding:6px 10px !important; margin:0 4px !important;
+  box-sizing:border-box !important;}
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group-seek .vp-time{
+  display:block !important; flex:0 0 auto !important;
+  min-width:28px !important; text-align:center !important;
+  font-family:var(--mono) !important; font-size:11px !important;
+  letter-spacing:-.02em !important; font-variant-numeric:tabular-nums !important;
+  color:var(--ink-3) !important; white-space:nowrap !important;}
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]{
+  flex:1 1 auto !important; min-width:24px !important;}
+
+/* ── ONE slider for both seek rows ──────────────────────────────────
+   The music seek row's slider (.mv-seek, layout.css) is themed at class
+   level: var(--surface-4) track, var(--ink) thumb. The video seek row's
+   (.vp-group-seek) is not — layout.css ships it in hardcoded white
+   (rgba(255,255,255,.18) track, #fff thumb) and hides the thumb overflow,
+   and only the id-scoped layers recolour it, which the embedded copy does
+   not always win. That is why the audio seek bar read black and the video
+   one white. Both rows now get the same tokens and the same geometry,
+   wherever they live and whichever ids survive the clone. */
+html body #mgPlayerSlot .vp-float-bar .vp-group-seek,
+html body #mgPlayerSlot .music-body .mv-seek{
+  background:var(--surface-3) !important; border:0 !important;
+  border-radius:var(--r-md,6px) !important;}
+html body #mgPlayerSlot .vp-float-bar .vp-group-seek input[type="range"],
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"],
+html body #mgPlayerSlot .music-body .mv-seek input[type="range"]{
+  -webkit-appearance:none !important; appearance:none !important;
+  flex:1 1 auto !important; min-width:24px !important;
+  height:4px !important; background:var(--surface-4) !important;
+  border:0 !important; border-radius:2px !important;
+  outline:none !important; overflow:visible !important; cursor:pointer !important;}
+html body #mgPlayerSlot .vp-float-bar .vp-group-seek input[type="range"]::-webkit-slider-runnable-track,
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-runnable-track,
+html body #mgPlayerSlot .music-body .mv-seek input[type="range"]::-webkit-slider-runnable-track{
+  height:4px !important; background:var(--surface-4) !important;
+  border:0 !important; border-radius:2px !important;}
+html body #mgPlayerSlot .vp-float-bar .vp-group-seek input[type="range"]::-webkit-slider-thumb,
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-thumb,
+html body #mgPlayerSlot .music-body .mv-seek input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none !important; appearance:none !important;
+  width:12px !important; height:12px !important; border-radius:50% !important;
+  background:var(--ink) !important; border:0 !important;
+  margin-top:-4px !important; cursor:pointer !important;}
+html body #mgPlayerSlot .vp-float-bar .vp-group-seek input[type="range"]::-moz-range-track,
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-moz-range-track,
+html body #mgPlayerSlot .music-body .mv-seek input[type="range"]::-moz-range-track{
+  height:4px !important; background:var(--surface-4) !important;
+  border:0 !important; border-radius:2px !important;}
+html body #mgPlayerSlot .vp-float-bar .vp-group-seek input[type="range"]::-moz-range-thumb,
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-moz-range-thumb,
+html body #mgPlayerSlot .music-body .mv-seek input[type="range"]::-moz-range-thumb{
+  width:12px !important; height:12px !important; border-radius:50% !important;
+  background:var(--ink) !important; border:0 !important; cursor:pointer !important;}
+
+/* the aspect-ratio button sits right after the volume icon and shows 16:9 */
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar #vpAspectBtn.vp-aspect-btn{
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  width:auto !important; min-width:44px !important; padding:0 8px !important;
+  flex:0 0 auto !important;}
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar #vpAspectBtn .vp-aspect-pct{
+  display:block !important; font-family:var(--mono) !important; font-size:11px !important;
+  line-height:1 !important; color:var(--ink-2) !important; white-space:nowrap !important;}
+html body #mgPlayerSlot #videoPanel #videoBody #vpFloatBar .vp-group #vpAspectBtn{ margin-right:2px !important; }
+
+/* music bar — the same compaction, so both bars stay twins */
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-controls{ padding:4px 6px !important; }
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-controls-left,
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-controls-center,
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-controls-right,
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-volume{
+  padding:0 3px !important; gap:1px !important;}
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-seek{
+  flex:1 1 auto !important; min-width:0 !important;
+  padding:6px 8px !important; margin:0 4px !important; gap:6px !important;}
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-seek span{ min-width:26px !important; }
+html body #mgPlayerSlot #musicPanel.panel-shell .mv-seek input[type="range"]{ min-width:24px !important; }
+
+/* genuinely tiny cards: the time labels and tracks give way a little more */
+html body #mgPlayerSlot.mg-narrow #videoPanel #videoBody #vpFloatBar .vp-group-seek .vp-time,
+html body #mgPlayerSlot.mg-narrow #musicPanel .mv-seek span{ min-width:22px !important; }
+html body #mgPlayerSlot.mg-narrow #videoPanel #videoBody #vpFloatBar #vpAspectBtn.vp-aspect-btn{
+  min-width:34px !important; padding:0 5px !important; }
+html body #mgPlayerSlot.mg-narrow #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"],
+html body #mgPlayerSlot.mg-narrow #musicPanel .mv-seek input[type="range"]{ min-width:16px !important; }
+
 /* ── the player card: the dashboard player, embedded ────── */
 #mgPlayerSlot{position:relative;flex:1 1 auto;min-height:0;
   display:flex;flex-direction:column;overflow:hidden;}
@@ -90,7 +219,13 @@ html body #mgPlayerSlot > .panel-shell.mg-embed .mv-now{
   overflow:hidden !important;}
 
 html body #mgPlayerSlot > .panel-shell.mg-embed .mv-visualizer{
-  position:relative !important;width:100% !important;height:100% !important;} span{display:none !important;}
+  position:relative !important;width:100% !important;height:100% !important;}
+/* the copy draws MY motion on a canvas — the player's own bars give way.
+   Scoped to the copy on purpose: a bare `span{display:none}` here used to
+   hide every <span> in the app (the seek-row times, the aspect ratio label,
+   the Import label, the pager range…). */
+html body #mgPlayerSlot > .panel-shell.mg-embed .mv-visualizer > span{
+  display:none !important;}
 
 html body #mgPlayerSlot > .panel-shell.mg-embed .mv-controls{flex:0 0 auto !important;}
 html body #mgPlayerSlot > .panel-shell.mg-embed .video-stage{flex:1 1 auto !important;min-height:0 !important;}
@@ -131,4 +266,197 @@ body.sf-player-only .floating-import,
 body.sf-player-only .fab-wrap{display:none !important;}
 body.sf-player-only{background:transparent !important;}
 body.sf-player-only .panel-shell .panel-head{-webkit-app-region:drag;}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE TWO STANDALONE APPS   (was apps.css)
+
+   Both apps are the same shell (index.html) in a different app mode:
+
+     index.html?app=player    → ScriptForge Player
+     index.html?app=manager   → Media Manager
+
+   Nothing here applies to the normal full app (no ?app= at all).
+   Kept at the end of the last stylesheet so it can correct every
+   earlier layer.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══ PLAYER APP — one media player, the whole window.
+   `.sf-player-only` (above) hides the app chrome; the rules below turn
+   the two floating dashboard panels into the app's only surface. The
+   playlist panels stay floating on top of it. ═══ */
+body.sf-app-player{ background: var(--bg) !important; overflow: hidden !important; }
+body.sf-app-player #bootOverlay{ display: none !important; }
+body.sf-app-player .info-panel,
+body.sf-app-player .ai-panel,
+body.sf-app-player .music-mini,
+body.sf-app-player .video-mini,
+body.sf-app-player .modal-root,
+body.sf-app-player .cmd-box{ display: none !important; }
+
+/* the player fills the window instead of floating over it */
+body.sf-app-player #videoPanel,
+body.sf-app-player #musicPanel{
+  position: fixed !important;
+  inset: 0 !important;
+  left: 0 !important; top: 0 !important;
+  right: 0 !important; bottom: 0 !important;
+  width: auto !important; height: auto !important;
+  max-width: none !important; max-height: none !important;
+  margin: 0 !important;
+  transform: none !important;                /* undo the centre-the-panel offset */
+  padding-top: 44px !important;              /* room for the app bar */
+  box-sizing: border-box !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  z-index: 60 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body.sf-app-player #videoPanel[hidden],
+body.sf-app-player #musicPanel[hidden]{ display: none !important; }
+
+body.sf-app-player #videoPanel > .panel-body,
+body.sf-app-player #musicPanel > .panel-body{
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding-bottom: 12px !important;
+}
+
+/* the close button belongs to the dashboard, not to a player window with
+   nothing to close back to; and the app bar above is the only drag handle
+   (the panel head holds a text field a drag region would swallow) */
+body.sf-app-player #videoPanel .panel-head,
+body.sf-app-player #musicPanel .panel-head{ -webkit-app-region: no-drag; }
+body.sf-app-player #videoPanel .panel-head .v-close,
+body.sf-app-player #musicPanel .panel-head .v-close{ display: none !important; }
+
+/* the video stage takes all the height the docked control bar leaves */
+body.sf-app-player #videoPanel .video-stage{
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+body.sf-app-player #videoPanel .vp-float-bar{ flex: 0 0 auto !important; }
+
+/* the playlist panels float above the player */
+body.sf-app-player #videoPlaylistPanel,
+body.sf-app-player #musicPlaylistPanel{ z-index: 80 !important; }
+
+/* empty stage — the player window is never a blank rectangle */
+.sf-player-empty{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 24px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--bg);
+}
+.sf-player-empty > i{ font-size: 26px; color: var(--ink-4); }
+.sf-player-empty > b{ font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.sf-player-empty > span{ font-size: 12px; color: var(--ink-3); }
+.sf-player-empty .sf-appbar-btn{ margin-top: 8px; height: 28px; padding: 0 10px; }
+
+/* ── the app's own slim title bar ─────────────────────────────── */
+.sf-appbar{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 44px;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  -webkit-app-region: drag;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sf-appbar > *{ -webkit-app-region: no-drag; }
+.sf-appbar-mark{
+  width: 24px; height: 24px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-sm, 4px);
+  background: var(--surface-4);
+  color: var(--ink-2);
+  font-size: 12px;
+}
+.sf-appbar-title{
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sf-appbar-spacer{ flex: 1 1 auto; min-width: 8px; height: 100%; -webkit-app-region: drag; }
+.sf-appbar-btn{
+  height: 26px;
+  min-width: 26px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm, 4px);
+  color: var(--ink-3);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.sf-appbar-btn i{ font-size: 13px; }
+.sf-appbar-btn:hover{ background: var(--surface-4); color: var(--ink); }
+.sf-appbar-btn.active{ background: var(--surface-4); color: var(--ink); border-color: var(--line-3); }
+
+/* ═══ MEDIA MANAGER APP — the Manager page is the app. ═══ */
+/* the dashboard's floating player is redundant — the Manager embeds one */
+body.sf-app-manager [data-act="open-music"]{ display: none !important; }
+/* nor the floating mini players, nor the mini music bar */
+body.sf-app-manager .music-mini,
+body.sf-app-manager .video-mini{ display: none !important; }
+
+/* ═══ NO FOCUS OUTLINE — Manager and Player alike ═══
+   theme.css draws a 2px :focus-visible ring in the theme's accent, which
+   showed up as an outline around the Manager's topbar / library controls
+   and around the Player's bar and stage as soon as anything was focused.
+   Neither app draws an outline now. */
+html:focus,
+html:focus-visible,
+body:focus,
+body:focus-visible,
+html body :focus,
+html body :focus-visible,
+html body video,
+html body audio,
+html body canvas{
+  outline: none !important;
+}
+/* Firefox draws its own inner focus border on buttons/inputs */
+html body button::-moz-focus-inner,
+html body input::-moz-focus-inner{
+  border: 0 !important;
+}
+
+/* ═══ TOPBAR — Player · Statistics · Settings ═══
+   The Manager page is the app's home, so the topbar keeps its actions
+   there (pages.js). They are icon-only squares — the icon and its title
+   carry the meaning, so no label can crowd the bar at any width. */
+.topbar-actions .topbar-btn{
+  padding: 6px;
+  gap: 0;
+  justify-content: center;
+}
+.topbar-actions .topbar-btn i{ font-size: 14px; }
 

@@ -3940,26 +3940,81 @@ html body .dc-pager-btn:hover:not(:disabled){ background:var(--overlay); color:v
 html body .dc-pager-btn:disabled{ opacity:.35; cursor:default; }
 html body .dc-pager-range{ font-size:11px; color:var(--ink-4); }
 
-/* Video seek group → same filled capsule as the music seek. Beats every rule. */
+/* ═══ Video seek bar = the music player's seek bar, exactly.
+       Same filled capsule, same 0:00 · track · 0:00 anatomy, same 4px
+       track and round accent thumb as #musicPanel .mv-seek.
+       (3 ids, so it beats every other layer — layout, pages, the inline
+       block in index.html and the !important rules above.) ═══ */
 html body #videoPanel #videoBody #vpFloatBar .vp-group.vp-group-seek{
   background: var(--surface-3) !important;
-  border: 1px solid var(--line-2) !important;
+  border: 0 !important;                      /* the music seek has no outline */
   border-radius: var(--r-md,6px) !important;
-  padding: 6px 12px !important;
+  padding: 6px 12px !important;                /* same box as #musicPanel .mv-seek */
   margin: 0 8px !important;
+  gap: 10px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
 }
 
-/* Let the round thumb show again — no clipping */
+/* the two time labels — mono, tabular, fixed width, both ends */
+html body #videoPanel #videoBody #vpFloatBar .vp-group-seek .vp-time{
+  min-width: 34px !important;
+  text-align: center !important;
+  display: block !important;
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: -.02em !important;
+  font-variant-numeric: tabular-nums !important;
+  color: var(--ink-3) !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+/* the slider itself: a thin track that lets the round thumb out */
 html body #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]{
+  flex: 1 1 auto !important;
+  min-width: 40px !important;
+  height: 4px !important;
+  background: var(--surface-4) !important;
+  border: 0 !important;
+  border-radius: 2px !important;
   overflow: visible !important;              /* <- restores the circle */
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+html body #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-runnable-track{
+  height: 4px !important;
+  background: var(--surface-4) !important;
+  border: none !important;
+  border-radius: 2px !important;
 }
 html body #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none !important;
+  appearance: none !important;
   width: 12px !important;
   height: 12px !important;
   border-radius: 50% !important;             /* round, not a bar */
   background: var(--accent) !important;
   border: none !important;
   margin-top: -4px !important;               /* centers it on the 4px track */
+}
+html body #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-moz-range-thumb{
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: var(--accent) !important;
+  border: none !important;
+}
+html body #videoPanel #videoBody #vpFloatBar .vp-group-seek input[type="range"]::-moz-range-track{
+  height: 4px !important;
+  background: var(--surface-4) !important;
+  border-radius: 2px !important;
 }
 
 /* ═══ MANAGER — Vercel-style media manager ═══ */

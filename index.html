@@ -20,8 +20,8 @@
 <link rel="stylesheet" href="theme.css?v=4">
 <link rel="stylesheet" href="layout.css?v=6">
 <link rel="stylesheet" href="pages.css?v=11">
-<link rel="stylesheet" href="overrides.css?v=65">
-<link rel="stylesheet" href="manager.css?v=1">
+<link rel="stylesheet" href="overrides.css?v=66">
+<link rel="stylesheet" href="manager.css?v=9">
 <style>
 /* Video control bar — docked underneath the video area instead of floating over it */
 #vpFloatBar{
@@ -59,11 +59,9 @@ html body #vpFloatBar .vp-group-seek{
   margin: 0 8px !important;
   gap: 10px !important;
   flex: 1 1 auto !important;
-  min-width: 0 !important;
-  height: auto !important;
+  min-width: 0 !important;  height:auto !important;
   box-sizing: border-box !important;
 }
-order-box !important;
 #vpFloatBar .vp-group-seek input[type="range"]{
   height: 4px !important;
   background: #eaeaea !important;
@@ -886,6 +884,30 @@ html body #floatingImport{
   transform:none !important;
 }
 
+/* ═══ PLAYER — no outlines ════════════════════════════════════════
+   Every transport / pager / volume / aspect / fullscreen button drew a
+   hairline box, and both playing bars framed themselves. Flatten them
+   all. This covers the Manager (which embeds a clone of these panels)
+   and the standalone Player, since both render the same controls. */
+#vpFloatBar .mv-btn,
+#vpFloatBar .mv-play,
+#musicPanel .mv-controls .mv-btn,
+.music-body .mv-controls .mv-btn,
+#musicPanel .mv-controls .mv-play,
+.music-body .mv-controls .mv-play,
+#musicPanel .mv-pager-btn,
+#musicPanel .mp-vol-btn,
+.music-body .mp-vol-btn,
+.sf-appbar-btn{
+  border: 0 !important;
+}
+/* the bars themselves: video control bar, music play bar, and both
+   seek capsules lose their hairline frame too */
+#vpFloatBar,
+html body #vpFloatBar .vp-group-seek,
+#musicPanel .mv-seek{
+  border: 0 !important;
+}
 
 </style>
 </head>
@@ -895,6 +917,14 @@ html body #floatingImport{
 try{
   /* Overlay panes render the app read-only — no writes, no chrome */
   var _p = new URLSearchParams(location.search);
+  /* Which app is this window? Set on <body> before anything paints, so the
+     standalone Player / Media Manager never flash the dashboard first. */
+  var _app = _p.get('app');
+  if(_app === 'player' || _app === 'manager'){
+    window.SF_APP = _app;
+    document.body.classList.add(_app === 'player' ? 'sf-app-player' : 'sf-app-manager');
+    if(_app === 'player') document.body.classList.add('sf-player-only');
+  }
   if(_p.get('sfView') === '1' && window.parent !== window){
     window.SF_VIEW = true;
     document.documentElement.classList.add('sf-view');
@@ -942,13 +972,15 @@ try{
   <div class="breadcrumb" id="breadcrumb"></div>
   <div class="topbar-spacer"></div>
   <div class="topbar-actions" id="topbarActions" hidden>
-  <button class="topbar-btn" data-act="open-music" title="Player">
+  <button class="topbar-btn" data-act="open-music" title="Player" aria-label="Player">
     <i class="bi bi-play-circle"></i>
-    <span>Player</span>
   </button>
-  <button class="topbar-btn" data-act="open-settings" title="Settings">
+  <!-- Import lives on the library bar, next to the Video/Audio switch -->
+  <button class="topbar-btn" data-act="go-stats" title="Statistics" aria-label="Statistics">
+    <i class="bi bi-graph-up-arrow"></i>
+  </button>
+  <button class="topbar-btn" data-act="open-settings" title="Settings" aria-label="Settings">
     <i class="bi bi-gear"></i>
-    <span>Settings</span>
   </button>
 </div>
 </header>
@@ -956,48 +988,10 @@ try{
 <!-- ═══════════ MAIN STAGE ═══════════ -->
 <main class="stage" id="stage"></main>
 
-<!-- ═══════════ STATUS BAR (only on content pages) ═══════════ -->
-<footer class="statusbar" id="statusbar" hidden>
+<!-- ═══════════ STATUS BAR (blank) ═══════════ -->
+<div class="statusbar" id="statusbar">
   <div class="sb-left" id="sbLeft"></div>
   <div class="sb-right" id="sbRight"></div>
-</footer>
-
-<!-- ═══════════ OVERLAY SCREEN (draggable · resizable) ═══════════ -->
-<div class="ovl-wrap" id="ovlWrap" hidden>
-  <div class="ovl" id="ovlPanel">
-            <div class="ovl-head" id="ovlHead">
-      <span class="ovl-grab"></span>
-      <span class="ovl-acts">
-        <button class="icon-btn-sm" data-ovl="swap" title="Swap with the app screen"><i class="bi bi-arrow-left-right"></i></button>
-        <button class="v-close" data-ovl="close" title="Close">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </span>
-    </div>
-
-
-
-    <div class="ovl-body">
-      <iframe class="ovl-frame" id="ovlFrame" title="Overlay view" allow="autoplay; clipboard-write"></iframe>
-    </div>
-    <span class="ovl-edge" id="ovlEdge" title="Drag to resize the width"></span>
-    <span class="ovl-grip" id="ovlGrip" title="Drag to resize"></span>
-  </div>
-</div>
-
-
-<!-- ═══════════ AI PANEL (draggable) ═══════════ -->
-<div class="ai-panel" id="aiPanel" hidden>
-  <div class="ai-head" id="aiHead">
-    <span class="ai-title"><i class="bi bi-sparkles"></i> AI</span>
-    <div class="ai-head-actions">
-      <button class="icon-btn-sm" data-act="ai-min"><i class="bi bi-dash-lg"></i></button>
-      <button class="icon-btn-sm" data-act="ai-close"><i class="bi bi-x-lg"></i></button>
-    </div>
-  </div>
-  <div class="ai-body" id="aiBody"></div>
 </div>
 
 <!-- ═══════════ MODAL ROOT ═══════════ -->
@@ -1006,20 +1000,6 @@ try{
 <!-- ═══════════ TOAST ═══════════ -->
 <div class="toast" id="toast"><i class="bi bi-check-circle-fill"></i><span id="toastMsg"></span></div>
 <div class="toast-left" id="toastLeft"><i class="bi bi-info-circle-fill"></i><span id="toastLeftMsg"></span></div>
-
-<!-- ═══════════ COMMAND BOX (opens via Super / Shift+`) ═══════════ -->
-<div class="cmd-box" id="cmdBox" hidden>
-  <div class="cmd-head">
-    <i class="bi bi-command"></i>
-    <input class="cmd-input" id="cmdInput" placeholder="Type shortcut or command…" autocomplete="off" spellcheck="false">
-    <kbd>Esc</kbd>
-  </div>
-  <div class="cmd-list" id="cmdList"></div>
-  <div class="cmd-foot">
-    <span class="cmd-hint"><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-    <span class="cmd-hint"><kbd>↵</kbd> run</span>
-  </div>
-</div>
 
 <!-- ═══════════ MUSIC MINI (all other pages) ═══════════ -->
 <div class="music-mini" id="musicMini" hidden>
@@ -1033,55 +1013,15 @@ try{
 <!-- ═══════════ SCRIPTS — order matters ═══════════ -->
 <script src="state.js?v=14"></script>
 <script src="fs.js"></script>
-<script src="io.js"></script>
-<script src="pages.js?v=95"></script>
-<script src="manager.js?v=4"></script>
-<script src="ai.js?v=8"></script>
-<script src="plugins.js?v=9"></script>
-<script src="tools.js?v=2"></script>
+<script src="pages.js?v=98"></script>
+<script src="manager.js?v=8"></script>
 <script src="settings.js?v=16"></script>
 <script src="panels.js?v=9"></script>
 <script src="motion.js?v=4"></script>
-<script src="app.js?v=38"></script>
-<script src="chapter-buttons.js?v=18"></script>
-<script src="overlay.js?v=13"></script>
-<script src="utils.js?v=3"></script>
+<script src="app.js?v=41"></script>
 <script src="sounds.js?v=2"></script>
 
 
-
-<!-- ═══════════ INFO PANEL (slides in from right) ═══════════ -->
-<aside class="info-panel" id="infoPanel">
-  <div class="info-head">
-    <span class="info-title" id="infoTitle">Info</span>
-  </div>
-  <div class="info-body" id="infoBody"></div>
-</aside>
-
-<!-- ═══════════ IMPORT BUTTON (bottom-right floating) ═══════════ -->
-<button class="floating-import" id="floatingImport" title="Left-click: add audio · Right-click: add video">
-
-  <i class="bi bi-box-arrow-in-down"></i>
-  <span>Import</span>
-</button>
-
-<!-- ═══════════ FAB ═══════════ -->
-<div class="fab-wrap" id="fabWrap">
-  <div class="fab-menu" id="fabMenu" hidden>
-    <div class="fab-menu-head">Views</div>
-    <div class="fab-menu-body" id="fabMenuViews"></div>
-  </div>
-  <div class="fab-ai" id="fabAI" hidden>
-    <div class="fab-ai-head">
-      <i class="bi bi-stars"></i>
-      <span>AI Assistant</span>
-    </div>
-    <div class="fab-ai-body" id="fabAIBody"></div>
-  </div>
-       <button class="fab-btn" id="fabBtn" title="Menu · right-click for AI">
-    <span class="fab-mark"><i class="bi bi-pen-fill"></i></span>
-  </button>
-</div>
 
 <!-- ═══════════ VIDEO PANEL ═══════════ -->
 <div class="panel-shell video-panel" id="videoPanel" hidden>

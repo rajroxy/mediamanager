@@ -389,146 +389,16 @@ if(pillEl){
   
 });
 
-// Modes list needs click handlers — mode click opens pages panel on right
-document.addEventListener('click', e => {
-  const mi = e.target.closest('.mode-item');
-  if(mi && mi.dataset.modeSwitch){
-    e.preventDefault();
-    const isOpen = document.getElementById('pagesOverlay')?.classList.contains('open');
-    const sameMode = (mi.dataset.modeSwitch === S.mode);
+/* The writing app's mode list, pages overlay and menu bar are gone — the
+   Manager and the Player are the whole app now. */
 
-    // If clicking the same mode while panel is open → just close panel
-    if(sameMode && isOpen){
-      if(typeof togglePagesOverlay === 'function') togglePagesOverlay(false);
-      if(typeof hideInfoPanel === 'function') hideInfoPanel();
-      return;
-    }
-
-    // Otherwise switch mode + open panel
-    if(!sameMode){
-      switchMode(mi.dataset.modeSwitch);
-    }
-    if(typeof renderPagesOverlay === 'function') renderPagesOverlay();
-    if(typeof togglePagesOverlay === 'function') togglePagesOverlay(true);
-    if(typeof hideInfoPanel === 'function') hideInfoPanel();
-  }
-}, true);
-
-// Menu bar contents
-function buildMenubar(){
-  const mb = document.querySelector('.menubar');
-  if(!mb || mb.dataset.built) return;
-  mb.dataset.built = '1';
-  const MENUS = [
-    {label:'File', items:[
-      {icon:'file-plus', label:'New project', act:() => TOOLS.newProject()},
-      {icon:'folder', label:'Open project', act:() => togglePagesOverlay()},
-      {icon:'save', label:'Save', hint:'Ctrl+S', act:() => { save(); toast('Saved'); }},
-      {sep:true},
-      {icon:'box-arrow-in-down', label:'Import', act:() => goPage('import')},
-      {icon:'box-arrow-up', label:'Export', act:() => goPage('import')},
-      {sep:true},
-      {icon:'printer', label:'Print', hint:'Ctrl+P', act:() => IO.printDoc()},
-      {icon:'download', label:'Full backup', act:() => IO.exportFullBackup()},
-      {sep:true},
-      {icon:'sliders', label:'Settings', act:() => SETTINGS.open()}
-    ]},
-    {label:'Edit', items:[
-      {icon:'arrow-counterclockwise', label:'Undo', hint:'Ctrl+Z', act:() => runCmd('undo')},
-      {icon:'arrow-clockwise', label:'Redo', hint:'Ctrl+Y', act:() => runCmd('redo')},
-      {sep:true},
-      {icon:'search', label:'Find & replace', hint:'Ctrl+F', act:() => openFind()},
-      {sep:true},
-      {icon:'scissors', label:'Cut', act:() => document.execCommand('cut')},
-      {icon:'copy', label:'Copy', act:() => document.execCommand('copy')},
-      {icon:'clipboard', label:'Paste', act:() => document.execCommand('paste')},
-      {sep:true},
-      {icon:'check2-all', label:'Select all', hint:'Ctrl+A', act:() => document.execCommand('selectAll')}
-    ]},
-    {label:'View', items:[
-      {icon:'grid-1x2', label:'Pages panel', act:() => togglePagesOverlay()},
-      {icon:'collection', label:'Modes panel', act:() => { renderModesPanel(); toggleModesPanel(); }},
-      {sep:true},
-      {icon:'bullseye', label:'Focus mode', hint:'Ctrl+Shift+F', act:() => toggleFocus()},
-      {icon:'arrows-fullscreen', label:'Fullscreen', act:() => { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }}
-    ]},
-    {label:'Format', items:[
-      {icon:'type-bold', label:'Bold', hint:'Ctrl+B', act:() => runCmd('bold')},
-      {icon:'type-italic', label:'Italic', hint:'Ctrl+I', act:() => runCmd('italic')},
-      {icon:'type-underline', label:'Underline', hint:'Ctrl+U', act:() => runCmd('underline')},
-      {icon:'type-strikethrough', label:'Strike', act:() => runCmd('strikeThrough')},
-      {sep:true},
-      {icon:'text-left', label:'Align left', act:() => runCmd('justifyLeft')},
-      {icon:'text-center', label:'Center', act:() => runCmd('justifyCenter')},
-      {icon:'text-right', label:'Align right', act:() => runCmd('justifyRight')},
-      {icon:'text-paragraph', label:'Justify', act:() => runCmd('justifyFull')},
-      {sep:true},
-      {icon:'list-ul', label:'Bullet list', act:() => runCmd('insertUnorderedList')},
-      {icon:'list-ol', label:'Numbered list', act:() => runCmd('insertOrderedList')},
-      {sep:true},
-      {icon:'eraser', label:'Clear formatting', act:() => runCmd('removeFormat')}
-    ]},
-    {label:'Insert', items:[
-      {icon:'hr', label:'Divider', act:() => insertHTML('<hr>')},
-      {icon:'info-square', label:'Callout', act:() => insertHTML('<div style="border-left:3px solid var(--accent);padding:10px 14px;background:var(--surface-2);border-radius:6px;margin:12px 0;"><strong>Note:</strong> </div>')},
-      {icon:'emoji-smile', label:'Icon library', act:() => openIconLibrary()},
-      {sep:true},
-      {icon:'calendar-event', label:'Date', act:() => insertHTML(new Date().toLocaleDateString())},
-      {icon:'clock', label:'Time', act:() => insertHTML(new Date().toLocaleTimeString())}
-    ]},
-    {label:'AI', items:[
-      {icon:'stars', label:'Toggle AI panel', hint:'Ctrl+I', act:() => toggleAIPanel()},
-      {sep:true},
-      {icon:'magic', label:'Fix grammar', act:() => AI_FNS.fixGrammar()},
-      {icon:'translate', label:'Translate', act:() => AI_FNS.translate()},
-      {icon:'stars', label:'Improve', act:() => AI_FNS.improve()},
-      {icon:'arrow-right-circle', label:'Continue writing', act:() => AI_FNS.continue()},
-      {icon:'arrows-angle-expand', label:'Expand', act:() => AI_FNS.expand()},
-      {icon:'card-text', label:'Summarize', act:() => AI_FNS.summarize()},
-      {icon:'arrow-repeat', label:'Rewrite', act:() => AI_FNS.rewrite()}
-    ]},
-    {label:'Help', items:[
-      {icon:'keyboard', label:'Keyboard shortcuts', act:() => openShortcuts()},
-      {icon:'book', label:'About', act:() => SETTINGS.open()}
-    ]}
-  ];
-
-  MENUS.forEach(m => {
-    const btn = document.createElement('button');
-    btn.className = 'menu-btn';
-    btn.textContent = m.label;
-    btn.onclick = e => {
-      e.stopPropagation();
-      document.querySelectorAll('.menu-drop').forEach(x => x.remove());
-      document.querySelectorAll('.menu-btn').forEach(x => x.classList.remove('open'));
-      btn.classList.add('open');
-      const drop = document.createElement('div');
-      drop.className = 'menu-drop';
-      const rect = btn.getBoundingClientRect();
-      drop.style.left = rect.left + 'px';
-      drop.style.top = (rect.bottom + 4) + 'px';
-      m.items.forEach(item => {
-        if(item.sep){
-          const s = document.createElement('div');
-          s.className = 'menu-sep';
-          drop.appendChild(s);
-          return;
-        }
-        const bi = document.createElement('button');
-        bi.className = 'menu-item';
-        bi.innerHTML = `<i class="mi-icon bi bi-${item.icon}"></i><span>${item.label}</span>${item.hint ? `<span class="mi-hint">${item.hint}</span>` : ''}`;
-        bi.onclick = () => { drop.remove(); btn.classList.remove('open'); item.act(); };
-        drop.appendChild(bi);
-      });
-      document.body.appendChild(drop);
-    };
-    mb.appendChild(btn);
-  });
-
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.menu-drop').forEach(x => x.remove());
-    document.querySelectorAll('.menu-btn').forEach(x => x.classList.remove('open'));
-  });
+/* Settings and the shortcuts sheet live in #modalRoot. This closes them;
+   the file that used to define it is not part of the project any more. */
+function closeModal(){
+  const root = $('modalRoot');
+  if(!root) return;
+  root.classList.remove('open');
+  root.innerHTML = '';
 }
 
 function openShortcuts(){
@@ -704,16 +574,6 @@ if(rn){
     return;
   }
 
-// In app.js, inside the document.addEventListener('click', ...) block
-
-// Legacy entry point — no longer rendered in the project list, kept for safety
-const projOpen = t.closest('[data-proj-open]');
-if(projOpen){
-  e.preventDefault();
-  e.stopPropagation();
-  openProjectById(projOpen.getAttribute('data-proj-open'));
-  return;
-}
 // ─── Play row ───
 // Clicking a playlist row only selects it — playback starts from the row's
 // Play button or the player's play/pause control.
@@ -759,11 +619,8 @@ function boot(){
     if(typeof applyLang === 'function') applyLang();
     document.body.setAttribute('data-layout', S.config.layout || 'classic');
 
-    buildMenubar();
-
-    if(typeof renderModesPanel === 'function') renderModesPanel();
-        // Always start on Dashboard
-    if(typeof goPage === 'function') goPage('home');
+    /* The Manager is the app's home. */
+    if(typeof goPage === 'function') goPage('overview');
 
     // Overlay panes open straight onto the page / player they asked for
     try{
@@ -779,17 +636,7 @@ function boot(){
     // an overlay pane uses it to tell its parent window what it's showing.
     window.SF_NAV_READY = true;
 
-    // Bring back the overlay pane in the main window if it was left open
-    if(window.SF_VIEW !== true && S.config.overlay && S.config.overlay.open && typeof overlayShow === 'function'){
-      overlayShow(true);
-    }
-
-    if(window.PLUGINS?.initVoice) PLUGINS.initVoice();
-    if(window.initAIDrag) initAIDrag();
-
     if(typeof updateBreadcrumb === 'function') updateBreadcrumb();
-    if(typeof renderModePills === 'function') renderModePills();
-    if(typeof updateStatusBar === 'function') updateStatusBar();
 
        console.log('%c ✓ ScriptForge booted', 'color:#10b981;font-weight:700;');
   }catch(e){
@@ -798,12 +645,6 @@ function boot(){
     if(stage){
       stage.innerHTML = '<div style="padding:40px;color:#ef4444;font-family:monospace;">Boot error: ' + e.message + '<br><br>Check browser console for details.</div>';
     }
-      // Apply status bar + FAB visibility for initial page
-  const isDash = (S.page === 'home' || S.page === 'stats' || S.page === 'overview');
-  const sb = document.getElementById('statusbar');
-  if(sb) sb.hidden = isDash;
-  const fab = document.getElementById('fabWrap');
-  if(fab) fab.style.display = isDash ? 'none' : '';
   }
 
   // Boot animation — skipped inside an overlay pane
@@ -821,86 +662,6 @@ document.addEventListener('click', e => {
     toast('Theme: ' + next.name);   // one pane button, two seats — see overlay.js
   }
 });
-
-// ═══════════════════════════════════════════════════════════
-//   FLOATING IMPORT BUTTON — dual behavior (fab extras appended at file end)
-//   Left click  → GitHub import panel
-//   Right click → local file picker
-// ═══════════════════════════════════════════════════════════
-
-(function wireFloatingImport(){
-  const btn = document.getElementById('floatingImport');
-  if(!btn) return;
-
-  // Left click → GitHub panel
-  btn.addEventListener('click', e => {
-    e.preventDefault();
-    e.stopPropagation();
-    if(typeof openGitHubPanel === 'function') openGitHubPanel();
-    else toast('GitHub panel not loaded', 'err');
-  }, true);
-
-  // Right click → file picker
-  btn.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.txt,.md,.markdown,.json,.html,.htm,.fountain,.spmd,.doc,.docx,.rtf';
-    input.multiple = false;
-    input.onchange = async ev => {
-      const file = ev.target.files && ev.target.files[0];
-      if(!file) return;
-
-      const text = await file.text();
-      const d = D();
-      const chapterId = uid();
-
-      // Convert plain text → HTML paragraphs
-      const html = text
-        .split(/\n{2,}/)
-        .map(block => `<p>${esc(block).replace(/\n/g, '<br>')}</p>`)
-        .join('');
-
-      d.chapters.push({
-        id: chapterId,
-        title: file.name.replace(/\.[^.]+$/, ''),
-        content: html,
-        children: [],
-        collapsed: false
-      });
-      d.currentChapter = chapterId;
-      save();
-
-      if(typeof togglePagesOverlay === 'function') togglePagesOverlay(false);
-      if(typeof goPage === 'function') goPage('write');
-      toast('Imported: ' + file.name);
-    };
-    input.click();
-  }, true);
-})();
-
-// ═══════════════════════════════════════════════════════════
-//   SWITCH MODE
-// ═══════════════════════════════════════════════════════════
-function switchMode(modeId){
-  const m = MODES.find(x => x.id === modeId);
-  if(!m){
-    console.warn('[switchMode] unknown mode:', modeId);
-    return;
-  }
-  S.mode = modeId;
-document.body.setAttribute('data-mode', modeId);           // ← CSS hook
-document.body.setAttribute('data-writing-mode', modeId);   // keep if other code reads it
-if(!S.modes[modeId]) S.modes[modeId] = freshModeData();
-// Land on the dashboard for the new mode — the caller opens the mode's
-// categories panel; never jump straight into the editor.
-S.page = 'home';
-if(typeof goPage === 'function') goPage(S.page);
-}
-
-window.switchMode = switchMode;
 
 // ═══════════════════════════════════════════════════════════
 //   INFO PANEL — slides in from right on page/project click
@@ -2370,65 +2131,6 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', fu
 //   Right click → local file picker
 // ═══════════════════════════════════════════════════════════
 
-function attachFloatingImport(){
-  const btn = document.getElementById('floatingImport');
-  if(!btn){ console.warn('[import] button not found'); return; }
-  if(btn.dataset.wired === '1') return;
-  btn.dataset.wired = '1';
-
-  btn.addEventListener('click', function(e){
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    console.log('[import] LEFT click → openGitHubPanel');
-    if(typeof openGitHubPanel === 'function') openGitHubPanel();
-    else console.error('[import] openGitHubPanel missing');
-  }, true);
-
-  btn.addEventListener('contextmenu', function(e){
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    console.log('[import] RIGHT click → JSON project import');
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json,application/json';
-    input.multiple = false;
-
-    input.onchange = async function(ev){
-      const file = ev.target.files && ev.target.files[0];
-      if(!file) return;
-
-      if(!file.name.toLowerCase().endsWith('.json')){
-        toast('Only .json project files are supported', 'err');
-        return;
-      }
-
-      let parsed;
-      try{
-        const text = await file.text();
-        parsed = JSON.parse(text);
-      }catch(err){
-        toast('Invalid JSON file', 'err');
-        return;
-      }
-
-      importJSONProject(parsed, file.name);
-    };
-
-    input.click();
-  }, true);
-
-  console.log('[import] button wired ✓');
-}
-
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', attachFloatingImport);
-} else {
-  attachFloatingImport();
-}
-window.attachFloatingImport = attachFloatingImport;
-
-
 // ═══════════════════════════════════════════════════════════
 //   JSON PROJECT IMPORT — routed by name keywords
 //   Name must contain: novel | screenplay
@@ -2581,3 +2283,302 @@ const category = cls.category;
 }
 
 window.importJSONProject = importJSONProject;
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE TWO STANDALONE APPS
+
+   The whole interface lives in index.html. This block turns that one
+   shell into two separate apps, chosen by the URL:
+
+     index.html?app=player    → ScriptForge Player
+        A player-only window: no dashboard, no Manager — just the media
+        player, filling the window. This is the app the operating system
+        hands audio/video files to.
+        Optional  &file=<path|url>   plays that file on boot.
+                  &player=<path|url> is accepted too (legacy).
+
+     index.html?app=manager   → Media Manager
+        The Manager page becomes the app's only page, so the window
+        opens straight into the file library / folders / queue.
+
+   No ?app= → the normal full app, untouched.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+var qs  = new URLSearchParams(location.search);
+var APP = String(qs.get('app') || '').toLowerCase();
+if(APP !== 'player' && APP !== 'manager') return;     /* full app — leave it alone */
+
+window.SF_APP = APP;
+
+/* ── helpers ─────────────────────────────────────────────────────── */
+function $(id){ return document.getElementById(id); }
+function toastSafe(msg, kind){ if(typeof window.toast === 'function') window.toast(msg, kind); }
+
+var VIDEO_RE = /\.(mp4|webm|mkv|mov|m4v|avi|m3u8|ogv|ts)(\?|#|$)/i;
+
+function isVideoUrl(u){ return VIDEO_RE.test(String(u)); }
+
+/* a bare filesystem path (or a path from the OS) becomes a file:// url.
+   Media filenames are full of spaces and brackets, so encode them. */
+function toUrl(p){
+  if(!p) return '';
+  var s = String(p);
+  if(/^[a-z][a-z0-9+.-]*:\/\//i.test(s) || /^(blob|data):/i.test(s)) return s;
+  s = s.replace(/\\/g, '/');
+  if(/^[a-z]:\//i.test(s)) s = '/' + s;          /* C:/x → /C:/x */
+  else if(s.charAt(0) !== '/') s = '/' + s;
+  return 'file://' + encodeURI(s).replace(/#/g, '%23');
+}
+function nameOf(url){
+  try{
+    var s = String(url).split('?')[0].split('#')[0].split(/[\\/]/).pop() || '';
+    return decodeURIComponent(s).replace(/\.[^.]+$/, '') || 'Untitled';
+  }catch(e){ return 'Untitled'; }
+}
+
+/* ── hand a file to the app's own player ─────────────────────────── */
+function playMedia(url){
+  if(!url) return;
+  if(typeof window.SF_PLAY_EXTERNAL === 'function'){ window.SF_PLAY_EXTERNAL(url); return; }
+  if(isVideoUrl(url)){
+    if(typeof window.videoPlayDirect === 'function') window.videoPlayDirect(url, false);
+    if(typeof window.openVideoPanel === 'function') window.openVideoPanel();
+  } else if(window.Music && Music.audio){
+    Music.currentIndex = -1;
+    Music.audio.src = url;
+    var p = Music.audio.play(); if(p && p.catch) p.catch(function(){});
+    if(typeof window.openMusicPanel === 'function') window.openMusicPanel();
+  }
+}
+/* everything after the first file joins the playlist instead of playing */
+function queueMedia(url){
+  if(isVideoUrl(url)){
+    if(typeof window.videoPlaylistAdd === 'function') window.videoPlaylistAdd(url, nameOf(url), 'url');
+  } else if(typeof window.musicAddURL === 'function'){
+    window.musicAddURL(url);
+  }
+}
+function playMany(urls){
+  var list = (urls || []).filter(Boolean);
+  if(!list.length) return;
+  playMedia(list[0]);
+  for(var i = 1; i < list.length; i++) queueMedia(list[i]);
+}
+
+/* ── pick files: native dialog in Electron, <input> in a browser ─── */
+function pickMedia(){
+  var api = window.electronAPI || {};
+  if(typeof api.pickMedia === 'function'){
+    return Promise.resolve(api.pickMedia()).then(function(paths){
+      return (paths || []).map(toUrl);
+    });
+  }
+  return new Promise(function(resolve){
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'audio/*,video/*';
+    input.multiple = true;
+    input.onchange = function(ev){
+      var files = Array.prototype.slice.call((ev.target && ev.target.files) || []);
+      resolve(files.map(function(f){
+        return (window.electronAPI && f.path) ? toUrl(f.path) : URL.createObjectURL(f);
+      }));
+    };
+    input.click();
+  });
+}
+function openFiles(){
+  pickMedia().then(function(urls){
+    if(!urls.length) return;
+    playMany(urls);
+  }).catch(function(e){ toastSafe('Could not open that file', 'err'); });
+}
+
+/* run after the app has booted (its own 'load' handler) so nothing we do
+   here can be undone by the first page render */
+function whenLoaded(fn){
+  if(document.readyState === 'complete') fn();
+  else window.addEventListener('load', fn);
+}
+
+/* ── the empty video stage: never leave the window blank ─────────── */
+function makeEmptyStage(){
+  var d = document.createElement('div');
+  d.className = 'sf-player-empty';
+  d.innerHTML =
+    '<i class="bi bi-play-circle"></i>' +
+    '<b>Drop a video here</b>' +
+    '<span>or open a file from your computer</span>' +
+    '<button class="sf-appbar-btn" data-sf-bar="open">' +
+      '<i class="bi bi-folder2-open"></i><span>Open file</span></button>';
+  return d;
+}
+function watchVideoStage(){
+  var stage = $('videoStage');
+  if(!stage || typeof MutationObserver !== 'function') return;
+  function sync(){
+    var el = stage.querySelector('.sf-player-empty');
+    if(stage.querySelector('video')){ if(el) el.remove(); return; }
+    if(!el) stage.appendChild(makeEmptyStage());
+  }
+  new MutationObserver(sync).observe(stage, { childList: true });
+  sync();
+}
+
+/* ── drag a file onto the window ─────────────────────────────────── */
+function wireDrops(){
+  window.addEventListener('dragover', function(e){ e.preventDefault(); }, false);
+  window.addEventListener('drop', function(e){
+    e.preventDefault();
+    var dt = e.dataTransfer; if(!dt) return;
+    var urls = [];
+    if(dt.files && dt.files.length){
+      Array.prototype.forEach.call(dt.files, function(f){
+        urls.push((window.electronAPI && f.path) ? toUrl(f.path) : URL.createObjectURL(f));
+      });
+    } else if(typeof dt.getData === 'function'){
+      var raw = dt.getData('text/uri-list') || dt.getData('text/plain') || '';
+      raw.split(/\r?\n/).forEach(function(line){
+        line = (line || '').trim();
+        if(line && line.charAt(0) !== '#') urls.push(line);
+      });
+    }
+    if(urls.length) playMany(urls.map(toUrl));
+  }, false);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MEDIA MANAGER APP
+   ═══════════════════════════════════════════════════════════════════ */
+/* the two pages this app has: the library and its statistics */
+var MM_PAGES = ['overview', 'stats'];
+
+function bootManagerApp(){
+  document.body.classList.add('sf-app-manager');
+  document.title = 'Media Manager';
+
+  /* The Manager is the app: everything else routes back to it, except the
+     Statistics page the topbar opens. */
+  var inner = window.goPage;
+  if(typeof inner === 'function'){
+    window.goPage = function(id){
+      if(MM_PAGES.indexOf(id) < 0) id = 'overview';
+      return inner.apply(this, arguments);
+    };
+  }
+
+  /* the topbar shows no app name — pages.js leaves the crumb empty on the
+     Manager and names only a sub-page (Statistics) */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PLAYER APP
+   ═══════════════════════════════════════════════════════════════════ */
+var bar = null;
+
+function barBtn(kind){ return bar ? bar.querySelector('[data-sf-bar="' + kind + '"]') : null; }
+
+function setBarTitle(){
+  var el = bar && bar.querySelector('.sf-appbar-title');
+  if(!el) return;
+  var v = document.querySelector('#videoStage video');
+  var a = $('mpAudio');
+  var url = (v && (v.currentSrc || v.src)) || (a && (a.currentSrc || a.src)) || '';
+  el.textContent = url ? nameOf(url) : 'ScriptForge Player';
+}
+
+function syncBar(){
+  var vp = $('videoPanel'), mp = $('musicPanel');
+  var vOn = !!(vp && !vp.hidden), mOn = !!(mp && !mp.hidden);
+  var bV = barBtn('video'), bA = barBtn('audio');
+  if(bV) bV.classList.toggle('active', vOn);
+  if(bA) bA.classList.toggle('active', mOn);
+  setBarTitle();
+}
+
+function buildBar(){
+  bar = document.createElement('div');
+  bar.className = 'sf-appbar';
+  bar.innerHTML =
+    '<span class="sf-appbar-mark"><i class="bi bi-collection-play"></i></span>' +
+    '<span class="sf-appbar-title">ScriptForge Player</span>' +
+    '<span class="sf-appbar-spacer"></span>' +
+    '<button class="sf-appbar-btn" data-sf-bar="open" title="Open a media file…">' +
+      '<i class="bi bi-folder2-open"></i><span>Open</span></button>' +
+    '<button class="sf-appbar-btn" data-sf-bar="video" title="Video player">' +
+      '<i class="bi bi-film"></i></button>' +
+    '<button class="sf-appbar-btn" data-sf-bar="audio" title="Audio player">' +
+      '<i class="bi bi-music-note-beamed"></i></button>';
+  document.body.appendChild(bar);
+}
+
+function bootPlayerApp(){
+  /* sf-player-only already hides the app chrome (see manager.css) */
+  document.body.classList.add('sf-player-only', 'sf-app-player');
+  document.title = 'ScriptForge Player';
+
+  buildBar();
+  wireDrops();
+  /* the media panels are declared below this script in index.html, so the
+     stage only exists once the document has finished parsing */
+  whenLoaded(watchVideoStage);
+
+  /* one handler covers the title bar and the empty stage's button */
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('[data-sf-bar]') : null;
+    if(!b) return;
+    e.preventDefault();
+    var what = b.dataset.sfBar;
+    if(what === 'open'){ openFiles(); return; }
+    if(what === 'video' && typeof window.openVideoPanel === 'function'){ window.openVideoPanel(); }
+    if(what === 'audio' && typeof window.openMusicPanel === 'function'){ window.openMusicPanel(); }
+    syncBar();
+  });
+
+  /* keep the title and the video/audio toggle in step with playback */
+  document.addEventListener('play', function(e){
+    var el = e.target;
+    if(!el || !el.tagName) return;
+    if(el.tagName === 'VIDEO' || el.tagName === 'AUDIO') setTimeout(syncBar, 0);
+  }, true);
+  ['openVideoPanel', 'openMusicPanel', 'closeVideoPanel', 'closeMusicPanel'].forEach(function(fn){
+    var orig = window[fn];
+    if(typeof orig !== 'function') return;
+    window[fn] = function(){ var r = orig.apply(this, arguments); setTimeout(syncBar, 0); return r; };
+  });
+
+  /* The OS files (double-click, "Open with") and ?file= both end up in
+     manager.js's openMediaExternally via SF_PLAY_EXTERNAL, which already
+     opens the right panel and starts playback. */
+
+  /* Electron may have started us with a file on the command line. */
+  var f = qs.get('file') || qs.get('player') || '';
+  if(!f && location.hash.indexOf('#play=') === 0) f = location.hash.slice(6);
+  if(f){
+    try{ f = decodeURIComponent(f); }catch(e){}
+    whenLoaded(function(){ setTimeout(function(){ playMedia(toUrl(f)); syncBar(); }, 150); });
+  }
+
+  /* Nothing to play yet → open the player anyway so the window is never
+     blank. (The empty stage offers an Open button, and a file can be
+     dropped straight onto the window.) A file the OS hands us may still be
+     on its way, so give it a moment before falling back. */
+  whenLoaded(function(){
+    setTimeout(function(){
+      var vp = $('videoPanel'), mp = $('musicPanel');
+      if(!(vp && !vp.hidden) && !(mp && !mp.hidden) && typeof window.openVideoPanel === 'function'){
+        window.openVideoPanel();
+      }
+      syncBar();
+    }, f ? 400 : (window.electronAPI ? 700 : 150));
+  });
+}
+
+/* ── go ──────────────────────────────────────────────────────────── */
+if(APP === 'manager') bootManagerApp();
+else bootPlayerApp();
+
+console.log('%c ✓ the ' + APP + ' app is ready', 'color:#a6e3a1;font-weight:600;');
+})();

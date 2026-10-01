@@ -1129,7 +1129,7 @@ SETTINGS.renderFormat = function(){
   });
   grid.addEventListener('click', e => {
     const el = e.target.closest('[data-mode-switch]');
-    if(el) switchMode(el.dataset.modeSwitch);
+    if(el && typeof switchMode === 'function') switchMode(el.dataset.modeSwitch);
   });
   c1.appendChild(grid);
   root.appendChild(c1);

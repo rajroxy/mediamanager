@@ -1,0 +1,23 @@
+# Media Manager — the standalone library app (its own install, no player).
+#   npm run dist:manager
+#
+# sfApp pins the packaged app to the Manager page (main.js reads it), so the
+# window opens straight into the file library / folders / queue.
+appId: com.scriptforge.manager
+productName: Media Manager
+directories:
+  output: dist/manager
+files:
+  - "**/*"
+  - "!dist/**"
+  - "!electron-builder.*.yml"
+  - "!server.js"
+extraMetadata:
+  sfApp: manager
+win:
+  target: nsis
+mac:
+  category: public.app-category.productivity
+linux:
+  target: AppImage
+  category: AudioVideo
