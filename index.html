@@ -17,11 +17,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Merriweather:wght@400;700;900&family=Playfair+Display:wght@500;700;900&family=Lora:wght@400;500;700&family=Crimson+Text:wght@400;600&family=EB+Garamond:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=Caveat:wght@400;600&family=Dancing+Script:wght@400;600&family=Source+Serif+4:wght@400;600&family=Courier+Prime:wght@400;700&family=IBM+Plex+Serif:wght@400;500;600&family=Libre+Baskerville:wght@400;700&family=Noto+Serif+Devanagari:wght@400;600&family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Bengali:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=4">
-<link rel="stylesheet" href="layout.css?v=6">
-<link rel="stylesheet" href="pages.css?v=11">
-<link rel="stylesheet" href="overrides.css?v=66">
-<link rel="stylesheet" href="manager.css?v=9">
+<link rel="stylesheet" href="theme.css?v=5">
+<link rel="stylesheet" href="layout.css?v=7">
+<link rel="stylesheet" href="pages.css?v=12">
+<link rel="stylesheet" href="overrides.css?v=69">
+<link rel="stylesheet" href="manager.css?v=14">
 <style>
 /* Video control bar — docked underneath the video area instead of floating over it */
 #vpFloatBar{
@@ -909,6 +909,39 @@ html body #vpFloatBar .vp-group-seek,
   border: 0 !important;
 }
 
+/* ═══ BORDERLESS — Manager and Player alike ════════════════════════
+   Both apps drop every visible hairline frame: topbar, status bar,
+   cards, panes, panel shells, playing bars and their controls.
+   A border keeps its width but turns transparent, so layout never
+   shifts and no 1px seam appears. This is the last rule in the inline
+   sheet, and the :not(#…) chain above it lifts the selector past any
+   id/class border rule declared elsewhere (manager.css, overrides.css,
+   pages.css, and the !important rules in this sheet), so nothing is
+   left framed. */
+html,
+body,
+html body :not(#nb0):not(#nb1),
+html body :not(#nb0):not(#nb1)::before,
+html body :not(#nb0):not(#nb1)::after{
+  border-color: transparent !important;
+}
+
+/* ═══ NO STATUS BAR ═════════════════════════════════════════════════
+   The Manager has no bottom bar — the element is hidden and its 24px
+   grid row collapsed, so the cards run down to the bottom edge. The
+   overlay/inline view keeps its own grid (.sf-view). */
+html body .statusbar{ display:none !important; }
+html body:not(.sf-view){ grid-template-rows:44px 0 0 1fr 0 !important; }
+
+/* ═══ DIVIDER — one line under the topbar, edge to edge ═════════════
+   Runs from the left edge to the right edge, below the logo and the
+   settings icon and above the Manager's cards (the Video/Audio bar).
+   Drawn as an inset shadow because the app-wide border reset above
+   makes every real border transparent. */
+html body .topbar{
+  box-shadow: inset 0 -1px 0 var(--line) !important;
+}
+
 </style>
 </head>
 <body>
@@ -1011,14 +1044,14 @@ try{
 </div>
 
 <!-- ═══════════ SCRIPTS — order matters ═══════════ -->
-<script src="state.js?v=14"></script>
+<script src="state.js?v=15"></script>
 <script src="fs.js"></script>
-<script src="pages.js?v=98"></script>
+<script src="pages.js?v=99"></script>
 <script src="manager.js?v=8"></script>
-<script src="settings.js?v=16"></script>
+<script src="settings.js?v=17"></script>
 <script src="panels.js?v=9"></script>
 <script src="motion.js?v=4"></script>
-<script src="app.js?v=41"></script>
+<script src="app.js?v=42"></script>
 <script src="sounds.js?v=2"></script>
 
 

@@ -66,8 +66,6 @@
   --spring:cubic-bezier(.34,1.56,.64,1);
 
   --topbar-h:44px;
-  --menubar-h:32px;
-  --toolbar-h:40px;
   --ui-scale:1;
 
   --shadow-intensity:1;
@@ -89,8 +87,6 @@
 
   /* ── Chrome ── */
   --topbar-h:44px;
-  --menubar-h:32px;
-  --toolbar-h:40px;
   --ui-scale:1;
 
   /* ── User-adjustable (settings.js controls these) ── */
@@ -208,7 +204,7 @@ body.no-animations *{animation-duration:.01ms!important;transition-duration:.01m
 
 /* ── Print ── */
 @media print{
-  .topbar,.menubar,.toolbar,.statusbar,.fab-wrap,.music-mini,.toast,.modal-root{display:none!important;}
+  .topbar,.statusbar,.music-mini,.toast,.modal-root{display:none!important;}
   .stage{padding:0!important;}
 }
 
@@ -256,43 +252,9 @@ body.no-animations *{animation-duration:.01ms!important;transition-duration:.01m
 }
 #setTabs::-webkit-scrollbar{display:none;}
 
-/* ── MODE PILLS ── clean, no accent tint */
-.mode-pill{
-  padding:6px 14px;
-  background:transparent;
-  border:1px solid transparent;
-  border-radius:var(--r-sm);
-  color:var(--ink-3);
-  font-size:12.5px;
-  font-weight:500;
-  cursor:pointer;
-  transition:all var(--t-fast) var(--ease);
-  white-space:nowrap;
-}
-.mode-pill:hover{
-  background:var(--overlay);
-  color:var(--ink);
-}
-.mode-pill.active{
-  background:var(--surface-3);
-  color:var(--ink);
-  border-color:var(--line-2);
-  font-weight:500;
-}
-.mode-pill i{font-size:13px;color:inherit;}
-
 /* ── FORM INPUTS ── Vercel style */
 .inp,.sel,
-.tb-select,.tb-input,
-.ai-select,.ai-input,
-.music-add-input,
-.cmd-input,
-.beat-input,
-.col-title,
-.draft-card-title,
-.draft-card-body,
-.cast-name,
-.cast-details{
+.tb-input{
   background:transparent;
   border:1px solid var(--line-2);
   border-radius:var(--r-sm);
@@ -303,18 +265,14 @@ body.no-animations *{animation-duration:.01ms!important;transition-duration:.01m
   outline:none;
 }
 .inp:hover,.sel:hover,
-.tb-select:hover,.tb-input:hover,
-.ai-select:hover,.ai-input:hover{
+.tb-input:hover{
   border-color:var(--line-3);
 }
 .inp:focus,.sel:focus,
-.tb-select:focus,.tb-input:focus,
-.ai-select:focus,.ai-input:focus,
-.music-add-input:focus{
+.tb-input:focus{
   border-color:var(--ink-3);
 }
-.inp::placeholder,
-.ai-input::placeholder{
+.inp::placeholder{
   color:var(--ink-4);
 }
 

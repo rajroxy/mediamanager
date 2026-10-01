@@ -15,7 +15,13 @@
 
 /* ── headers, lists, rows ───────────────────────────────── */
 .mg-head{flex:0 0 auto;display:flex;align-items:center;gap:6px;
-  padding:8px 10px;border-bottom:1px solid var(--line-2);}
+  padding:8px 10px;border-bottom:0;}
+/* The left card's top line is its own bar — a distinct strip spanning
+   just this card (not the window), bracketed so the switch row reads as
+   separated from the list below. */
+.mg-lib > .mg-head{
+  background:var(--surface-1);
+  box-shadow:inset 0 1px 0 var(--line-2), inset 0 -1px 0 var(--line-2);}
 .mg-type{font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);
   background:transparent;border:1px solid var(--line-2);
   border-radius:var(--r-sm);padding:5px 12px;cursor:pointer;}
@@ -63,6 +69,10 @@
   align-items:center !important;justify-content:space-between !important;
   gap:8px !important;padding:8px 12px !important;
   border-top:1px solid var(--line) !important;}
+/* the pager's rule, drawn as a shadow — the app-wide border reset above
+   makes the border-top invisible. Every card that owns a pager gets it:
+   the left card and the third (bottom-right) card alike. */
+html body .mg-card .vpl-pager{box-shadow:inset 0 1px 0 var(--line) !important;}
 .mg-card .vpl-range{font-size:11px;color:var(--ink-3);
   font-variant-numeric:tabular-nums;}
 
@@ -259,11 +269,8 @@ html body #mgPlayerSlot .video-stage:fullscreen{background:#000 !important;}
 
 /* ── Electron player-only layer (?player=<url>) ─────────── */
 body.sf-player-only .topbar,
-body.sf-player-only .menubar,
 body.sf-player-only .statusbar,
-body.sf-player-only .stage,
-body.sf-player-only .floating-import,
-body.sf-player-only .fab-wrap{display:none !important;}
+body.sf-player-only .stage{display:none !important;}
 body.sf-player-only{background:transparent !important;}
 body.sf-player-only .panel-shell .panel-head{-webkit-app-region:drag;}
 
@@ -286,12 +293,9 @@ body.sf-player-only .panel-shell .panel-head{-webkit-app-region:drag;}
    playlist panels stay floating on top of it. ═══ */
 body.sf-app-player{ background: var(--bg) !important; overflow: hidden !important; }
 body.sf-app-player #bootOverlay{ display: none !important; }
-body.sf-app-player .info-panel,
-body.sf-app-player .ai-panel,
 body.sf-app-player .music-mini,
 body.sf-app-player .video-mini,
-body.sf-app-player .modal-root,
-body.sf-app-player .cmd-box{ display: none !important; }
+body.sf-app-player .modal-root{ display: none !important; }
 
 /* the player fills the window instead of floating over it */
 body.sf-app-player #videoPanel,

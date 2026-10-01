@@ -33,16 +33,11 @@ SETTINGS.open = function(){
   `;
   root.appendChild(scrim);
 
-     const tabs = [
-    {id:'ai',           icon:'stars',          label:'AI Assistance'},
-    {divider:true},
-    {id:'general',      icon:'gear',           label:'General'},
-    {id:'appearance',   icon:'palette',        label:'Appearance'},
-    {id:'typography',   icon:'fonts',          label:'Typography'},
-    {id:'plugins',      icon:'puzzle',         label:'Plugins'},
-    {id:'language',     icon:'translate',      label:'Language'},
-    {id:'privacy',      icon:'shield-lock',    label:'Privacy'},
-    {id:'sound',        icon:'volume-up',      label:'Sound'}
+  const tabs = [
+    {id:'appearance', icon:'palette',     label:'Appearance'},
+    {id:'general',    icon:'gear',        label:'General'},
+    {id:'sound',      icon:'volume-up',   label:'Sound'},
+    {id:'privacy',    icon:'shield-lock', label:'Privacy'}
   ];
   const tabBar = $('setTabs');
   tabs.forEach(t => {
@@ -53,13 +48,13 @@ SETTINGS.open = function(){
       return;
     }
     const b = document.createElement('button');
-    b.className = 'set-tab' + (t.id === 'ai' ? ' active' : '');
+    b.className = 'set-tab' + (t.id === 'appearance' ? ' active' : '');
     b.innerHTML = `<i class="bi bi-${t.icon}"></i> ${t.label}`;
     b.dataset.setTab = t.id;
     tabBar.appendChild(b);
   });
 
-  renderSetTab('ai');
+  renderSetTab('appearance');
 
 };
 
@@ -73,11 +68,7 @@ function renderSetTab(id){
   const body = $('setBody');
   if(!body) return;
   body.innerHTML = '';
-  // two tabs are named differently to their renderer — without this they'd
-  // open an empty panel
-  const RENDER_ALIAS = { typography:'type' };
-  const key = RENDER_ALIAS[id] || id;
-  if(SETTINGS.renderers[key]) SETTINGS.renderers[key](body);
+  if(SETTINGS.renderers[id]) SETTINGS.renderers[id](body);
   enhanceSelects(body);
 }
 
@@ -207,34 +198,6 @@ function card(title, icon){
 
 /* A toggle row that applies its change immediately — used by the tabs that
    inherited the experimental options. */
-function cfgRow(cardEl, label, hint, key, after){
-  const t = document.createElement('div');
-  t.className = 'tgl';
-  t.classList.toggle('on', !!S.config[key]);
-  t.onclick = function(){
-    S.config[key] = !S.config[key];
-    t.classList.toggle('on', S.config[key]);
-    applyConfig(key);
-    save();
-    if(typeof after === 'function') after(t);
-  };
-  cardEl.appendChild(row(label, hint, t));
-  return t;
-}
-function classRow(cardEl, label, hint, key, cls, onWord, offWord){
-  const t = document.createElement('div');
-  t.className = 'tgl';
-  t.classList.toggle('on', !!S.config[key]);
-  t.onclick = function(){
-    S.config[key] = !S.config[key];
-    t.classList.toggle('on', S.config[key]);
-    document.body.classList.toggle(cls, S.config[key]);
-    save();
-  };
-  cardEl.appendChild(row(label, hint || (onWord || ''), t));
-  return t;
-}
-
 function bindToggle(el, key){
   el.classList.toggle('on', !!S.config[key]);
   el.addEventListener('click', () => {
@@ -251,30 +214,6 @@ function applyConfig(key){
   const root = document.documentElement;
   switch(key){
     case 'theme': applyThemeVars(c.theme); break;
-    case 'font':
-      root.style.setProperty('--doc-font', `'${c.font}', serif`);
-      const ed = $('editor'); if(ed) ed.style.fontFamily = `'${c.font}', serif`;
-      break;
-    case 'fontSize':
-      root.style.setProperty('--doc-size', c.fontSize + 'px');
-      const e2 = $('editor'); if(e2) e2.style.fontSize = c.fontSize + 'px';
-      break;
-    case 'lineHeight':
-      root.style.setProperty('--doc-line', c.lineHeight);
-      const e3 = $('editor'); if(e3) e3.style.lineHeight = c.lineHeight;
-      break;
-    case 'letterSpacing':
-      root.style.setProperty('--doc-track', c.letterSpacing + 'px');
-      break;
-    case 'wordSpacing':
-      root.style.setProperty('--doc-word', c.wordSpacing + 'px');
-      break;
-    case 'paraSpacing':
-      root.style.setProperty('--doc-para', c.paraSpacing + 'px');
-      break;
-    case 'editorWidth':
-      root.style.setProperty('--doc-max', c.editorWidth);
-      break;
     case 'uiScale':
       root.style.setProperty('--ui-scale', c.uiScale);
       document.body.style.zoom = c.uiScale;
@@ -283,23 +222,6 @@ function applyConfig(key){
       // a warm light filter across the whole app — independent of the theme
       document.body.classList.toggle('eye-comfort', !!c.eyeComfort);
       root.style.setProperty('--eye-amount', eyeComfortAlpha());
-      break;
-    case 'expOverlay':
-      // the editor toolbar carries one pane button: the docked split screen
-      // normally, the floating overlay when this is on
-      if(typeof renderToolbar === 'function') renderToolbar();
-      if(typeof overlayApplyMode === 'function') overlayApplyMode();
-      if(typeof overlayGeometry === 'function' && S.config.overlay && S.config.overlay.open) overlayGeometry();
-      break;
-    case 'expMixedFonts':
-      document.body.classList.toggle('mixed-fonts', !!c.expMixedFonts);
-      break;
-    case 'expOrganize':
-      // the assistant and the editor's right-click menu both grow the action
-      if(typeof buildAIPanel === 'function') buildAIPanel();
-      break;
-    case 'expHinglish':
-      if(typeof renderFabAI === 'function') renderFabAI();
       break;
   }
 }
@@ -326,8 +248,7 @@ function applyAllConfig(){
   rs.setProperty('--surface-opacity', 1);
   rs.setProperty('--border-opacity', 1);
   rs.setProperty('--backdrop-blur', '0px');
-  ['theme','font','fontSize','lineHeight','letterSpacing','wordSpacing','paraSpacing','editorWidth','uiScale','eyeComfort',
-   'expMixedFonts','expOverlay'].forEach(applyConfig);
+  ['theme','uiScale','eyeComfort'].forEach(applyConfig);
   if(typeof applyVisualizerAlign === 'function') applyVisualizerAlign();
 }
 
@@ -553,15 +474,10 @@ SETTINGS.renderers.appearance = function(root){
 
   root.appendChild(c8);
 
-  const c11 = card('Interface', 'window-stack');
-  classRow(c11, 'Overlay screen', 'Floating overlay pane on the editor toolbar — off leaves the docked split screen', 'expOverlay', 'overlay-on');
-  root.appendChild(c11);
-
 };
 
 // ═══ APPLY THEME IMMEDIATELY ═══
 function applyThemeNow(){
-  document.body.setAttribute('data-writing-mode', S.mode || 'novel');
   document.body.setAttribute('data-style', S.config.style || 'vercel');
   document.body.setAttribute('data-color', S.config.color || 'minimal');
   applyThemeVars(S.config.theme || 'night');
@@ -569,19 +485,6 @@ function applyThemeNow(){
 window.applyThemeNow = applyThemeNow;
 
 SETTINGS.renderers.general = function(root){
-  const c1 = card('Core', 'gear');
-  const autoSave = document.createElement('div');
-  autoSave.className = 'tgl';
-  bindToggle(autoSave, 'autoSave');
-  c1.appendChild(row('Auto-save', 'Save changes every few seconds', autoSave));
-
-  const autoVer = document.createElement('div');
-  autoVer.className = 'tgl';
-  bindToggle(autoVer, 'autoVersion');
-  c1.appendChild(row('Auto-snapshot', 'Save a snapshot every 10 minutes', autoVer));
-
-  root.appendChild(c1);
-
   const c2 = card('Interface', 'display');
   const scale = document.createElement('input');
   scale.type = 'range';
@@ -599,610 +502,6 @@ SETTINGS.renderers.general = function(root){
   c2.appendChild(row('UI scale', 'Zoom the whole interface', [scale, scaleVal]));
 
   root.appendChild(c2);
-
-  const snap = document.createElement('button');
-  snap.className = 'btn btn-ghost';
-  snap.innerHTML = '<i class="bi bi-bookmark-plus"></i> Snapshot now';
-  snap.onclick = function(){
-    if(typeof TOOLS !== 'undefined' && typeof TOOLS.snapshot === 'function') TOOLS.snapshot();
-    else toast('Snapshot not available', 'warn');
-    closeModal();
-  };
-  c1.appendChild(row('Manual snapshot', 'Save a version right now', snap));
-};
-
-SETTINGS.renderers.ai = function(root){
-  const prov = aiProvider(S.config.provider);
-
-  const c1 = card('Provider', 'cloud');
-  const provSel = document.createElement('select');
-  provSel.className = 'sel';
-  provSel.style.minWidth = '260px';
-  // grouped: free cloud tiers · local · bring your own key
-  const byGroup = {};
-  AI_PROVIDERS.forEach(p => { (byGroup[p.group] = byGroup[p.group] || []).push(p); });
-  Object.keys(byGroup).forEach(g => {
-    const og = document.createElement('optgroup');
-    og.label = g;
-    byGroup[g].forEach(p => {
-      const o = document.createElement('option');
-      o.value = p.id; o.textContent = p.name;
-      if(p.id === S.config.provider) o.selected = true;
-      og.appendChild(o);
-    });
-    provSel.appendChild(og);
-  });
-  provSel.onchange = () => {
-    S.config.provider = provSel.value;
-    save();
-    renderSetTab('ai');           // key + endpoint + model follow the provider
-  };
-  const freeN = AI_PROVIDERS.filter(p => p.group === 'Free API tiers').length;
-  const byokN = AI_PROVIDERS.filter(p => p.group === 'Bring your own key').length;
-  c1.appendChild(row('AI provider',
-    freeN + ' with a free API tier · ' + byokN + ' bring-your-own-key · ' + AI_PROVIDERS.length + ' in total',
-    provSel));
-  root.appendChild(c1);
-
-  // ── KEY + ENDPOINT for the selected provider (BYOK lives here) ──
-  const c2 = card('Key & endpoint', 'key');
-  if(prov.keyless){
-    const note = document.createElement('div');
-    note.className = 'tiny muted';
-    note.style.marginBottom = '6px';
-    note.textContent = 'No API key needed — this provider runs on your own machine.';
-    c2.appendChild(note);
-  } else {
-    const inp = document.createElement('input');
-    inp.type = 'password';
-    inp.className = 'inp';
-    inp.placeholder = prov.keyPh || '';
-    inp.value = aiKeyFor(prov.id) || '';
-    inp.style.minWidth = '240px';
-    inp.oninput = () => { aiSetKey(prov.id, inp.value.trim()); save(); };
-    c2.appendChild(row(prov.keyLabel || 'API key', prov.keyHint || '', inp));
-  }
-
-  const base = document.createElement('input');
-  base.type = 'text';
-  base.className = 'inp';
-  base.style.minWidth = '240px';
-  base.placeholder = prov.base || 'https://your-endpoint/v1';
-  base.value = (S.config.aiBases && S.config.aiBases[prov.id]) || prov.base || '';
-  base.oninput = () => {
-    if(!S.config.aiBases) S.config.aiBases = {};
-    S.config.aiBases[prov.id] = base.value.trim();
-    save();
-  };
-  c2.appendChild(row('Endpoint',
-    prov.custom ? 'Required — any OpenAI-compatible base URL'
-                : 'Only change this for a proxy or self-hosted server',
-    base));
-  root.appendChild(c2);
-
-  const c3 = card('Model', 'cpu');
-  const sel = document.createElement('select');
-  sel.className = 'sel';
-  sel.id = 'aiModelSelect';
-  sel.style.minWidth = '200px';
-  c3.appendChild(row('Model', 'Click Fetch to load models from your provider', sel));
-
-  if(prov.custom){
-    const mid = document.createElement('input');
-    mid.type = 'text';
-    mid.className = 'inp';
-    mid.style.minWidth = '200px';
-    mid.placeholder = 'e.g. my-model-v1';
-    mid.value = aiModelFor('custom') || '';
-    mid.oninput = () => { aiSetModel('custom', mid.value.trim()); save(); };
-    c3.appendChild(row('Model id', 'Name your endpoint expects', mid));
-  }
-
-  const fetchBtn = document.createElement('button');
-  fetchBtn.className = 'btn btn-primary';
-  fetchBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Fetch models';
-  fetchBtn.onclick = async () => {
-    const models = await fetchModels();
-    if(models.length){
-      fillModelSelect(sel, models);
-    }
-  };
-  c3.appendChild(row('Refresh list', 'Pull latest available models', fetchBtn));
-
-  const testBtn = document.createElement('button');
-  testBtn.className = 'btn btn-ghost';
-  testBtn.innerHTML = '<i class="bi bi-wifi"></i> Test connection';
-  const badge = document.createElement('span');
-  badge.dataset.conn = '1';
-  badge.style.cssText = 'font-size:11.5px;font-weight:600;margin-left:8px;';
-  badge.textContent = 'Not tested';
-  testBtn.onclick = testConn;
-  c3.appendChild(row('Test', 'Verify your API key works', [testBtn, badge]));
-  root.appendChild(c3);
-
-  const c4 = card('Generation', 'sliders');
-  const temp = document.createElement('input');
-  temp.type = 'range';
-  temp.className = 'rng';
-  temp.min = 0; temp.max = 2; temp.step = .05;
-  temp.value = S.config.temperature;
-  const tval = document.createElement('span');
-  tval.className = 'rng-val';
-  tval.textContent = S.config.temperature;
-  temp.oninput = () => {
-    S.config.temperature = parseFloat(temp.value);
-    tval.textContent = S.config.temperature;
-    save();
-  };
-  c4.appendChild(row('Temperature', '0 = precise, 2 = creative', [temp, tval]));
-
-  const mt = document.createElement('input');
-  mt.type = 'number';
-  mt.className = 'inp sm';
-  mt.value = S.config.maxTokens;
-  mt.oninput = () => { S.config.maxTokens = parseInt(mt.value) || 4096; save(); };
-  c4.appendChild(row('Max tokens', 'Response length limit', mt));
-  root.appendChild(c4);
-
-  fillModelSelect(sel, S.config.availableModels[S.config.provider] || getDefaultModels());
-
-  /* ── Assistant actions — the two that used to live under Experimental ── */
-  const c5 = card('Assistant actions', 'stars');
-  cfgRow(c5, 'Organise my words', 'Adds an action that rebuilds a messy paragraph out of your own words — in the assistant and in the editor context menu', 'expOrganize');
-  cfgRow(c5, 'Hinglish conversions', 'Adds Hinglish → हिन्दी and Hinglish → English inside the Translate option of the right-click assistant', 'expHinglish');
-  root.appendChild(c5);
-};
-
-function fillModelSelect(sel, models){
-  sel.innerHTML = '';
-  models.forEach(m => {
-    const o = document.createElement('option');
-    o.value = m.id;
-    o.textContent = m.n || m.id;
-    if(m.id === aiModelFor(S.config.provider)) o.selected = true;
-    sel.appendChild(o);
-  });
-  if(!sel.value && models[0]) sel.value = models[0].id;
-  sel.onchange = () => { aiSetModel(S.config.provider, sel.value); save(); };
-}
-
-function getDefaultModels(){
-  const list = aiProvider(S.config.provider).models || [];
-  return list.length ? list.slice() : [{ id:'', n:'Type a model id above' }];
-}
-
-function buildModelDropdown(){
-  const sel = $('aiModelSelect');
-  if(!sel) return;
-  const models = S.config.availableModels[S.config.provider] || getDefaultModels();
-  fillModelSelect(sel, models);
-  if(typeof sel._ddRefresh === 'function') sel._ddRefresh();   // rebuild the dropdown card
-}
-
-SETTINGS.renderers.type = function(root){
-  const c1 = card('Font', 'fonts');
-  const sel = document.createElement('select');
-  sel.className = 'sel';
-  sel.style.minWidth = '200px';
-  FONTS.forEach(f => {
-    const o = document.createElement('option');
-    o.value = f.name; o.textContent = f.name;
-    if(f.name === S.config.font) o.selected = true;
-    sel.appendChild(o);
-  });
-  sel.onchange = () => { S.config.font = sel.value; applyConfig('font'); save(); };
-  c1.appendChild(row('Editor font', 'Font used in the writing canvas', sel));
-
-  const size = document.createElement('input');
-  size.type = 'range'; size.className = 'rng';
-  size.min = 12; size.max = 40; size.step = .5;
-  size.value = S.config.fontSize;
-  const sval = document.createElement('span');
-  sval.className = 'rng-val';
-  sval.textContent = S.config.fontSize + 'px';
-  size.oninput = () => {
-    S.config.fontSize = parseFloat(size.value);
-    sval.textContent = S.config.fontSize + 'px';
-    applyConfig('fontSize');
-  };
-  c1.appendChild(row('Size', '', [size, sval]));
-
-  const lh = document.createElement('input');
-  lh.type = 'range'; lh.className = 'rng';
-  lh.min = 1.2; lh.max = 2.6; lh.step = .05;
-  lh.value = S.config.lineHeight;
-  const lval = document.createElement('span');
-  lval.className = 'rng-val';
-  lval.textContent = S.config.lineHeight;
-  lh.oninput = () => {
-    S.config.lineHeight = parseFloat(lh.value);
-    lval.textContent = S.config.lineHeight;
-    applyConfig('lineHeight');
-  };
-  c1.appendChild(row('Line height', '', [lh, lval]));
-
-  const trk = document.createElement('input');
-  trk.type = 'range'; trk.className = 'rng';
-  trk.min = -2; trk.max = 6; trk.step = .1;
-  trk.value = S.config.letterSpacing;
-  const trkVal = document.createElement('span');
-  trkVal.className = 'rng-val';
-  trkVal.textContent = S.config.letterSpacing + 'px';
-  trk.oninput = () => {
-    S.config.letterSpacing = parseFloat(trk.value);
-    trkVal.textContent = S.config.letterSpacing + 'px';
-    applyConfig('letterSpacing');
-  };
-  c1.appendChild(row('Letter spacing', '', [trk, trkVal]));
-
-  const wrd = document.createElement('input');
-  wrd.type = 'range'; wrd.className = 'rng';
-  wrd.min = -2; wrd.max = 10; wrd.step = .5;
-  wrd.value = S.config.wordSpacing;
-  const wrdVal = document.createElement('span');
-  wrdVal.className = 'rng-val';
-  wrdVal.textContent = S.config.wordSpacing + 'px';
-  wrd.oninput = () => {
-    S.config.wordSpacing = parseFloat(wrd.value);
-    wrdVal.textContent = S.config.wordSpacing + 'px';
-    applyConfig('wordSpacing');
-  };
-  c1.appendChild(row('Word spacing', '', [wrd, wrdVal]));
-
-  const par = document.createElement('input');
-  par.type = 'range'; par.className = 'rng';
-  par.min = 0; par.max = 40; par.step = 1;
-  par.value = S.config.paraSpacing;
-  const parVal = document.createElement('span');
-  parVal.className = 'rng-val';
-  parVal.textContent = S.config.paraSpacing + 'px';
-  par.oninput = () => {
-    S.config.paraSpacing = parseInt(par.value);
-    parVal.textContent = S.config.paraSpacing + 'px';
-    applyConfig('paraSpacing');
-  };
-  c1.appendChild(row('Paragraph spacing', '', [par, parVal]));
-  root.appendChild(c1);
-
-  /* ── Writing — behaviour that used to sit in Editor / Experimental ── */
-  const c2 = card('Writing', 'pencil');
-  classRow(c2, 'Typewriter scroll', 'Keep the cursor vertically centered while typing', 'typewriterMode', 'typewriter-mode');
-  classRow(c2, 'Focus dimming', 'Dim everything except the current paragraph', 'focusDim', 'focus-dim');
-  cfgRow(c2, 'Live readability', 'Show the Flesch-Kincaid score while typing', 'liveMetrics');
-  cfgRow(c2, 'Dictionary autocomplete', 'Suggest words from an offline dictionary', 'dictSuggest');
-  root.appendChild(c2);
-
-  /* ── Typing ── */
-  const c3 = card('Typing', 'columns');
-  const w = document.createElement('select');
-  w.className = 'sel';
-  [['narrow','Narrow'],['classic','Classic'],['wide','Wide'],['full','Full width']].forEach(function(p){
-    const o = document.createElement('option');
-    o.value = p[0]; o.textContent = p[1];
-    if(p[0] === S.config.editorWidth) o.selected = true;
-    w.appendChild(o);
-  });
-  w.onchange = function(){ S.config.editorWidth = w.value; applyConfig('editorWidth'); save(); };
-  c3.appendChild(row('Canvas width', '', w));
-
-  const spell = document.createElement('div');
-  spell.className = 'tgl';
-  spell.classList.toggle('on', S.config.spellCheck);
-  spell.onclick = function(){
-    S.config.spellCheck = !S.config.spellCheck;
-    spell.classList.toggle('on', S.config.spellCheck);
-    const ed = $('editor');
-    if(ed) ed.setAttribute('spellcheck', S.config.spellCheck);
-    save();
-  };
-  c3.appendChild(row('Spell check', 'Browser spell check in the editor', spell));
-
-  const quotes = document.createElement('div');
-  quotes.className = 'tgl';
-  quotes.classList.toggle('on', S.config.smartQuotes);
-  quotes.onclick = function(){
-    S.config.smartQuotes = !S.config.smartQuotes;
-    quotes.classList.toggle('on', S.config.smartQuotes);
-    save();
-  };
-  c3.appendChild(row('Smart quotes', 'Convert straight quotes to curly', quotes));
-  root.appendChild(c3);
-
-  /* ── Autocomplete ── */
-  const c4 = card('Autocomplete', 'magic');
-  cfgRow(c4, 'AI ghost text', 'Show the AI continuation as you pause', 'ghostText');
-  cfgRow(c4, 'Suggestion chips', 'Quick actions along the bottom', 'suggestionChips');
-  root.appendChild(c4);
-
-  /* ── Intermixed fonts — moved here from Experimental ── */
-  const c5 = card('Intermixed fonts', 'fonts');
-  cfgRow(c5, 'Mix three fonts', 'While you write, words take one of three fonts in turn — the toolbar font dropdown is untouched', 'expMixedFonts');
-
-  if(!Array.isArray(S.config.mixedFonts)) S.config.mixedFonts = ['', '', ''];
-  for(let i = 0; i < 3; i++){
-    const sel = document.createElement('select');
-    sel.className = 'sel';
-    sel.style.minWidth = '190px';
-    sel.innerHTML = '<option value="">Editor font</option>' +
-      FONTS.map(f => `<option value="${f.name}"${S.config.mixedFonts[i] === f.name ? ' selected' : ''}>${f.name}</option>`).join('');
-    sel.onchange = function(){ S.config.mixedFonts[i] = sel.value; save(); };
-    c5.appendChild(row('Font ' + (i + 1), 'Slot ' + (i + 1) + ' of the rotation', sel));
-  }
-  const scopeSel = document.createElement('select');
-  scopeSel.className = 'sel';
-  scopeSel.style.minWidth = '190px';
-  scopeSel.innerHTML = `
-    <option value="word"${S.config.mixedFontScope !== 'sentence' && S.config.mixedFontScope !== 'random' ? ' selected' : ''}>Word by word</option>
-    <option value="sentence"${S.config.mixedFontScope === 'sentence' ? ' selected' : ''}>Sentence by sentence</option>
-    <option value="random"${S.config.mixedFontScope === 'random' ? ' selected' : ''}>Random from the three</option>`;
-  scopeSel.onchange = function(){ S.config.mixedFontScope = scopeSel.value; save(); };
-  c5.appendChild(row('Rotate by', 'How the three fonts take turns', scopeSel));
-  root.appendChild(c5);
-};
-
-SETTINGS.renderers.plugins = function(root){
-  const plugins = [
-    {k:'hinglish', name:'Hinglish transliteration', desc:'Convert Hinglish to Devanagari live'},
-    {k:'voice', name:'Voice dictation', desc:'Speak instead of type'},
-    {k:'dictionary', name:'Dictionary lookup', desc:'Free dictionary API (no key)'},
-    {k:'thesaurus', name:'Thesaurus & rhymes', desc:'Datamuse API (no key)'},
-    {k:'wikipedia', name:'Wikipedia research', desc:'Inline article summaries'},
-    {k:'websearch', name:'Text search', desc:'Inline search without leaving app'},
-    {k:'imagesearch', name:'Image search', desc:'Wikimedia Commons gallery'},
-    {k:'tts', name:'Text-to-speech', desc:'Read your writing aloud'}
-  ];
-  const c1 = card('Available plugins', 'puzzle');
-  plugins.forEach(p => {
-    const t = document.createElement('div');
-    t.className = 'tgl';
-    t.classList.toggle('on', S.config.plugins[p.k] !== false);
-    t.onclick = () => {
-      S.config.plugins[p.k] = !S.config.plugins[p.k];
-      t.classList.toggle('on', S.config.plugins[p.k]);
-      save();
-    };
-    c1.appendChild(row(p.name, p.desc, t));
-  });
-  root.appendChild(c1);
-};
-
-// ═══ LANGUAGE — the interface language, the language you write in, and
-//     the language AI answers in. ═══
-SETTINGS.renderers.language = function(root){
-  const ui = card('Interface language', 'translate');
-  const uiSel = document.createElement('select');
-  uiSel.className = 'sel';
-  uiSel.style.minWidth = '220px';
-  (window.UI_LANGS || []).forEach(function(l){
-    const o = document.createElement('option');
-    o.value = l.code;
-    o.textContent = l.name + (l.native && l.native !== l.name ? ' — ' + l.native : '');
-    if((S.config.uiLang || 'en') === l.code) o.selected = true;
-    uiSel.appendChild(o);
-  });
-  uiSel.onchange = function(){
-    S.config.uiLang = uiSel.value;
-    S.config.uiRtl = (uiSel.value === 'ar' || uiSel.value === 'ur');
-    save();
-    if(window.applyLang) applyLang();
-    renderSetTab('language');
-    if(typeof goPage === 'function') goPage(S.page);
-    const l = (window.UI_LANGS || []).find(function(x){ return x.code === S.config.uiLang; });
-    toast('Interface language: ' + (l ? l.name : S.config.uiLang));
-  };
-  ui.appendChild(row('Language of the app', 'Page and menu names switch language, right-to-left included.', uiSel));
-
-  const note = document.createElement('div');
-  note.className = 'tiny muted';
-  note.style.marginTop = '4px';
-  note.textContent = 'Page names, the page menu and the breadcrumb follow this setting today. The writing tools, prompts and panels are still in English.';
-  ui.appendChild(note);
-  root.appendChild(ui);
-
-  // ── the language you write in ──
-  const wr = card('Writing language', 'pencil');
-  const wrSel = document.createElement('select');
-  wrSel.className = 'sel';
-  wrSel.style.minWidth = '220px';
-    const all = [].concat(window.LANGS_INDIA || [], (window.LANGS_INTL || []).filter(l => l.code === 'en'));
-
-  const seen = {};
-  all.forEach(function(l){
-    if(seen[l.code]) return;
-    seen[l.code] = 1;
-    const o = document.createElement('option');
-    o.value = l.code;
-    o.textContent = (l.native ? l.native + ' — ' : '') + l.name;
-    if((S.config.defaultLang || 'en') === l.code) o.selected = true;
-    wrSel.appendChild(o);
-  });
-  wrSel.onchange = function(){
-    S.config.defaultLang = wrSel.value;
-    save();
-    document.querySelectorAll('[contenteditable="true"], textarea, input[type="text"]').forEach(function(el){
-      el.setAttribute('lang', S.config.defaultLang);
-    });
-    toast('Writing language set');
-  };
-  wr.appendChild(row('You write in', 'Used for spell check, the dictionary and the AI context.', wrSel));
-
-  const sp = document.createElement('div');
-  sp.className = 'tgl';
-  sp.classList.toggle('on', !!S.config.spellCheck);
-  sp.onclick = function(){
-    S.config.spellCheck = !S.config.spellCheck;
-    sp.classList.toggle('on', S.config.spellCheck);
-    save();
-    if(typeof applyAllConfig === 'function') applyAllConfig();
-  };
-  wr.appendChild(row('Spell check', 'Underlines a word the writing language does not know.', sp));
-  root.appendChild(wr);
-
-  // ── the language AI answers in ──
-  const out = card('AI replies in', 'stars');
-  const outSel = document.createElement('select');
-  outSel.className = 'sel';
-  outSel.style.minWidth = '220px';
-      [ ['auto','Match the writing language'], ['en','English'], ['hi','हिन्दी — Hindi'] ].forEach(function(pair){
-
-    const o = document.createElement('option');
-    o.value = pair[0];
-    o.textContent = pair[1];
-    if((S.config.outputLang || 'auto') === pair[0]) o.selected = true;
-    outSel.appendChild(o);
-  });
-  outSel.onchange = function(){ S.config.outputLang = outSel.value; save(); toast('AI reply language set'); };
-  out.appendChild(row('Reply language', 'Improve, rewrite and translate follow this.', outSel));
-
-  const hg = document.createElement('div');
-  hg.className = 'tgl';
-  hg.classList.toggle('on', !!(S.config.plugins && S.config.plugins.hinglish));
-  hg.onclick = function(){
-    if(!S.config.plugins) S.config.plugins = {};
-    S.config.plugins.hinglish = !S.config.plugins.hinglish;
-    hg.classList.toggle('on', S.config.plugins.hinglish);
-    save();
-  };
-  out.appendChild(row('Hinglish conversions', 'Hinglish ⇄ Hindi ⇄ English in the right-click options.', hg));
-  root.appendChild(out);
-
-  // ── the Merriam-Webster key, moved here from the old Environment tab ──
-  const lk = card('Lookup keys', 'key');
-  const wrap = document.createElement('div');
-  wrap.className = 'set-row';
-  wrap.innerHTML = '<div><div style="font-size:12.5px;font-weight:600;">Merriam-Webster dictionary</div>'
-    + '<div style="font-size:11px;color:var(--ink-3);margin-top:2px;">Free Collegiate key from dictionaryapi.com. Used by Utilities → Dictionary lookup.</div></div>';
-  const line = document.createElement('div');
-  line.style.cssText = 'display:flex;gap:8px;align-items:center;margin-top:8px;';
-  const inp = document.createElement('input');
-  inp.className = 'inp';
-  inp.type = 'password';
-  inp.placeholder = 'MW_API_KEY';
-  inp.style.cssText = 'flex:1;min-width:0;';
-  inp.value = String(S.config.mwApiKey || '');
-  const saveBtn = document.createElement('button');
-  saveBtn.className = 'btn btn-primary';
-  saveBtn.type = 'button';
-  saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save';
-  const clearBtn = document.createElement('button');
-  clearBtn.className = 'btn btn-ghost';
-  clearBtn.type = 'button';
-  clearBtn.innerHTML = '<i class="bi bi-x-lg"></i> Clear';
-  line.appendChild(inp); line.appendChild(saveBtn); line.appendChild(clearBtn);
-  const note2 = document.createElement('div');
-  note2.style.cssText = 'font-size:11px;color:var(--ink-4);margin-top:6px;';
-  note2.textContent = 'Saved in this browser. Without a key the open dictionary answers instead, so lookup always works.';
-  wrap.appendChild(line); wrap.appendChild(note2);
-  lk.appendChild(wrap);
-  saveBtn.onclick = function(){
-    S.config.mwApiKey = String(inp.value || '').trim();
-    save();
-    note2.textContent = S.config.mwApiKey ? 'Saved in this browser.' : 'Cleared.';
-  };
-  clearBtn.onclick = function(){
-    S.config.mwApiKey = '';
-    inp.value = '';
-    save();
-    note2.textContent = 'Cleared — the open dictionary answers again.';
-  };
-  root.appendChild(lk);
-};
-
-// ═══ Per-mode Format page ═══
-SETTINGS.renderFormat = function(){
-  const root = $('formatBody');
-  if(!root) return;
-  root.innerHTML = '';
-
-  const mode = MODES.find(m => m.id === S.mode);
-  const c1 = card('Writing mode', 'collection');
-  const grid = document.createElement('div');
-  grid.className = 'grid-auto';
-  MODES.forEach(m => {
-    const tile = document.createElement('div');
-    tile.className = 'tile' + (m.id === S.mode ? ' on' : '');
-    tile.dataset.modeSwitch = m.id;
-    tile.innerHTML = `<i class="bi bi-${m.icon}" style="font-size:24px;color:var(--accent-2);display:block;margin-bottom:8px;"></i>
-      <div style="font-size:13px;font-weight:700;">${m.name}</div>
-      <div style="font-size:10.5px;color:var(--ink-3);margin-top:2px;">${m.desc}</div>`;
-    grid.appendChild(tile);
-  });
-  grid.addEventListener('click', e => {
-    const el = e.target.closest('[data-mode-switch]');
-    if(el && typeof switchMode === 'function') switchMode(el.dataset.modeSwitch);
-  });
-  c1.appendChild(grid);
-  root.appendChild(c1);
-
-  const c2 = card('Canvas layout', 'layout-text-window');
-  const layouts = [
-    ['classic', 'Classic', 'Centered 760px'],
-    ['wide', 'Wide', 'Up to 1100px'],
-    ['narrow', 'Narrow', 'Focused 540px'],
-    ['fullbleed', 'Full bleed', 'Edge to edge'],
-    ['typewriter', 'Typewriter', 'Cursor always centered'],
-    ['twocolumn', 'Two column', 'Newspaper feel']
-  ];
-  const lg = document.createElement('div');
-  lg.className = 'grid-auto';
-  layouts.forEach(([id, name, desc]) => {
-    const tile = document.createElement('div');
-    tile.className = 'tile' + (id === S.config.layout ? ' on' : '');
-    tile.dataset.layoutPick = id;
-    tile.innerHTML = `<div style="font-size:13px;font-weight:700;">${name}</div>
-      <div style="font-size:10.5px;color:var(--ink-3);margin-top:4px;">${desc}</div>`;
-    lg.appendChild(tile);
-  });
-  lg.addEventListener('click', e => {
-    const el = e.target.closest('[data-layout-pick]');
-    if(!el) return;
-    S.config.layout = el.dataset.layoutPick;
-    document.body.setAttribute('data-layout', S.config.layout);
-    document.querySelectorAll('[data-layout-pick]').forEach(x => x.classList.toggle('on', x.dataset.layoutPick === S.config.layout));
-    save();
-  });
-  c2.appendChild(lg);
-  root.appendChild(c2);
-
-  const c3 = card('Font override', 'fonts');
-  const fsel = document.createElement('select');
-  fsel.className = 'sel';
-  fsel.style.minWidth = '200px';
-  const defaults = document.createElement('option');
-  defaults.value = '';
-  defaults.textContent = `Auto (${mode?.name || 'mode'} default)`;
-  fsel.appendChild(defaults);
-  FONTS.forEach(f => {
-    const o = document.createElement('option');
-    o.value = f.name; o.textContent = f.name;
-    if(f.name === S.config.font) o.selected = true;
-    fsel.appendChild(o);
-  });
-  fsel.onchange = () => { S.config.font = fsel.value; applyConfig('font'); save(); };
-  c3.appendChild(row('Override font', 'Leave on Auto to use the mode default', fsel));
-
-  const size = document.createElement('input');
-  size.type = 'number';
-  size.className = 'inp sm';
-  size.value = S.config.fontSize;
-  size.oninput = () => { S.config.fontSize = parseInt(size.value) || 17; applyConfig('fontSize'); save(); };
-  c3.appendChild(row('Font size', '', size));
-  root.appendChild(c3);
-
-  const c4 = card('Quick access', 'lightning');
-  const quick = document.createElement('div');
-  quick.className = 'chips';
-  ['write','read','draft','notebook','plan','board','timeline','cast','research','canvas'].forEach(pid => {
-    const p = PAGES.find(x => x.id === pid);
-    if(!p) return;
-    const b = document.createElement('button');
-    b.className = 'chip';
-    b.dataset.page = p.id;
-    b.innerHTML = `<i class="bi bi-${p.icon}"></i> ${p.name}`;
-    quick.appendChild(b);
-  });
-  c4.appendChild(quick);
-  root.appendChild(c4);
 };
 
 // ═══ PRIVACY ═══
@@ -1212,8 +511,8 @@ SETTINGS.renderers.privacy = function(root){
   const info = document.createElement('div');
   info.style.cssText = 'font-size:12.5px;line-height:1.7;color:var(--ink-2);padding:4px 0;';
   info.innerHTML =
-    'Everything you write is stored <strong>locally in your browser</strong>. ' +
-    'Nothing is uploaded to any server. AI features only send text when you explicitly click an AI action.';
+    'Your library, playlists and settings are stored <strong>locally on this machine</strong>. ' +
+    'Nothing is uploaded to any server.';
   c1.appendChild(info);
 
   const clearCache = document.createElement('button');
@@ -1238,34 +537,9 @@ SETTINGS.renderers.privacy = function(root){
     localStorage.removeItem('sf6_theme');
     location.reload();
   };
-  c1.appendChild(row('Clear all data', 'Wipe projects, chapters and notes', wipe));
+  c1.appendChild(row('Clear all data', 'Wipe the library, playlists and every saved setting', wipe));
 
   root.appendChild(c1);
-
-  const c2 = card('AI data', 'stars');
-
-  const disableAI = document.createElement('div');
-  disableAI.className = 'tgl';
-  disableAI.classList.toggle('on', !!S.config.aiDisabled);
-  disableAI.onclick = function(){
-    S.config.aiDisabled = !S.config.aiDisabled;
-    disableAI.classList.toggle('on', S.config.aiDisabled);
-    save();
-    toast(S.config.aiDisabled ? 'AI disabled' : 'AI enabled');
-  };
-  c2.appendChild(row('Disable all AI', 'Prevents sending text to any AI provider', disableAI));
-
-  const noHistory = document.createElement('div');
-  noHistory.className = 'tgl';
-  noHistory.classList.toggle('on', S.config.noAIHistory !== false);
-  noHistory.onclick = function(){
-    S.config.noAIHistory = !(S.config.noAIHistory !== false);
-    noHistory.classList.toggle('on', S.config.noAIHistory);
-    save();
-  };
-  c2.appendChild(row('Don\'t save AI results', 'AI responses never persist to storage', noHistory));
-
-  root.appendChild(c2);
 
   const c3 = card('Network', 'globe');
   const offline = document.createElement('div');
@@ -1298,9 +572,6 @@ document.addEventListener('click', e => {
     return;
   }
 
-  // Format page shortcuts
-  const pgEl = t.closest('[data-page]');
-  if(pgEl && pgEl.classList.contains('chip')){ goPage(pgEl.dataset.page); return; }
 }, true);
 
 // ═══ Expose ═══
@@ -1309,8 +580,6 @@ window.enhanceSelects = enhanceSelects;
 window.renderSetTab = renderSetTab;
 window.applyConfig = applyConfig;
 window.applyAllConfig = applyAllConfig;
-window.buildModelDropdown = buildModelDropdown;
-window.getDefaultModels = getDefaultModels;
 window.row = row;
 window.card = card;
 
